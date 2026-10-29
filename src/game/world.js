@@ -5,6 +5,7 @@ import { MAX_LIGHT_LEVEL } from '../engine/palette.js'
 import { TileMap } from '../engine/tilemap.js'
 import { Ash } from './ash.js'
 import { Hero } from './hero.js'
+import { MapBanner } from './map-banner.js'
 
 /**
  * @typedef {object} MapExit
@@ -54,6 +55,7 @@ export class World {
     this.ash = new Ash(ashSprites)
     this.camera = new Camera()
     this.fade = new Fade()
+    this.banner = new MapBanner()
 
     /** @type {MapDefinition} */
     this.mapDefinition = maps[Object.keys(maps)[0]]
@@ -85,6 +87,7 @@ export class World {
       y: this.hero.center.y + behind.y * TILE_SIZE,
     })
     this.camera.follow(definition.mode, this.tileMap, this.hero.center)
+    this.banner.show(definition.name)
   }
 
   /** @param {import('../engine/input.js').Input} input */
@@ -94,6 +97,10 @@ export class World {
 
     if (input.wasPressed('menu')) this.paused = !this.paused
     if (this.paused) return
+
+    // The banner's clock only runs once the fade-in is over and play has
+    // started, so it's always fully seen.
+    this.banner.update()
 
     // DEBUG: B cycles the light level so you can see the lighting system.
     // Remove once B has a real job.
@@ -129,6 +136,8 @@ export class World {
       { depth: this.hero.y + this.hero.height, draw: () => this.hero.draw(ctx, this.camera) },
     ]
     characters.sort((a, b) => a.depth - b.depth).forEach((c) => c.draw())
+
+    this.banner.draw(ctx)
 
     if (this.paused) {
       ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'

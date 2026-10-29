@@ -59,3 +59,14 @@ export const CHARACTER_COLORS = {
   dogEye: '#9be36b',
   wisp: '#c8f0ff',
 }
+
+/**
+ * Fixed colours for text and the panels behind it (banners, dialog, menus).
+ * Like character colours, these are never darkened by lighting, so text stays
+ * readable in the darkest places.
+ */
+export const UI_COLORS = {
+  text: '#f2e8d0',
+  panel: '#0b0a12',
+  panelBorder: '#6c6688',
+}

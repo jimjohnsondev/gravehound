@@ -71,8 +71,10 @@ src/
   main.js            boots everything
   style.css          page layout and on-screen controls
   engine/            reusable machinery: screen, loop, input, palette,
-                     tileset, tilemap, camera, sprite, fade
-  game/              Gravehound itself: world, hero, ash, tiles, sprites
+                     tileset, tilemap, camera, sprite, fade,
+                     font-glyphs (the pixel font as data), text
+  game/              Gravehound itself: world, hero, ash, tiles, sprites,
+                     map-banner
     maps/            one file per map; register new ones in maps/index.js
 tools/               desktop-only editors and the art import pipeline (planned)
 docs/                story, decisions, roadmap
