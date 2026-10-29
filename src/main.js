@@ -1,60 +1,49 @@
+/**
+ * Gravehound starts here.
+ *
+ * Wires the engine together: screen, input, main loop and the world.
+ * Game rules live in src/game; reusable machinery lives in src/engine.
+ */
 import './style.css'
-import heroImg from './assets/hero.png'
-import javascriptLogo from './assets/javascript.svg'
-import viteLogo from './assets/vite.svg'
-import { setupCounter } from './counter.js'
+import { Input } from './engine/input.js'
+import { startLoop } from './engine/loop.js'
+import { Screen } from './engine/screen.js'
+import { TileSet } from './engine/tileset.js'
+import { MAPS } from './game/maps/index.js'
+import { createAshSprites, createHeroSprites } from './game/sprites.js'
+import { TILE_TYPES } from './game/tiles.js'
+import { World } from './game/world.js'
 
-document.querySelector('#app').innerHTML = `
-<section id="center">
-  <div class="hero">
-    <img src="${heroImg}" class="base" width="170" height="179">
-    <img src="${javascriptLogo}" class="framework" alt="JavaScript logo"/>
-    <img src="${viteLogo}" class="vite" alt="Vite logo" />
-  </div>
-  <div>
-    <h1>Get started</h1>
-    <p>Edit <code>src/main.js</code> and save to test <code>HMR</code></p>
-  </div>
-  <button id="counter" type="button" class="counter"></button>
-</section>
+// Add ?touch to the URL to show the on-screen controls on a desktop browser.
+if (new URLSearchParams(location.search).has('touch')) {
+  document.body.classList.add('force-touch')
+}
 
-<div class="ticks"></div>
+const screen = new Screen(
+  /** @type {HTMLCanvasElement} */ (document.getElementById('screen')),
+  /** @type {HTMLElement} */ (document.getElementById('screen-area')),
+)
 
-<section id="next-steps">
-  <div id="docs">
-    <svg class="icon" role="presentation" aria-hidden="true"><use href="/icons.svg#documentation-icon"></use></svg>
-    <h2>Documentation</h2>
-    <p>Your questions, answered</p>
-    <ul>
-      <li>
-        <a href="https://vite.dev/" target="_blank">
-          <img class="logo" src="${viteLogo}" alt="" />
-          Explore Vite
-        </a>
-      </li>
-      <li>
-        <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
-          <img class="button-icon" src="${javascriptLogo}" alt="">
-          Learn more
-        </a>
-      </li>
-    </ul>
-  </div>
-  <div id="social">
-    <svg class="icon" role="presentation" aria-hidden="true"><use href="/icons.svg#social-icon"></use></svg>
-    <h2>Connect with us</h2>
-    <p>Join the Vite community</p>
-    <ul>
-      <li><a href="https://github.com/vitejs/vite" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#github-icon"></use></svg>GitHub</a></li>
-      <li><a href="https://chat.vite.dev/" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#discord-icon"></use></svg>Discord</a></li>
-      <li><a href="https://x.com/vite_js" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#x-icon"></use></svg>X.com</a></li>
-      <li><a href="https://bsky.app/profile/vite.dev" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#bluesky-icon"></use></svg>Bluesky</a></li>
-    </ul>
-  </div>
-</section>
+const input = new Input()
+input.attachTouchControls(/** @type {HTMLElement} */ (document.getElementById('touch-controls')))
 
-<div class="ticks"></div>
-<section id="spacer"></section>
-`
+const world = new World({
+  maps: MAPS,
+  tileset: new TileSet(TILE_TYPES),
+  heroSprites: createHeroSprites(),
+  ashSprites: createAshSprites(),
+})
+world.enterMap('cottage', 10, 8, 'down')
 
-setupCounter(document.querySelector('#counter'))
+startLoop({
+  update() {
+    input.update()
+    world.update(input)
+  },
+  draw() {
+    world.draw(screen.ctx)
+  },
+})
+
+// Handy in the browser console while developing: `gravehound.world.lightLevel = 3`
+Object.assign(window, { gravehound: { world, input } })

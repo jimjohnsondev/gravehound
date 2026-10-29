@@ -1,14 +1,16 @@
 {
   "name": "gravehound",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview --host",
+    "check": "tsc -p jsconfig.json"
   },
   "devDependencies": {
+    "typescript": "^5.9.0",
     "vite": "^8.3.5"
   }
 }

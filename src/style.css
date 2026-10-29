@@ -1,296 +1,219 @@
+/*
+ * Page layout for Gravehound.
+ *
+ * Phone (portrait):  game screen on top, d-pad and buttons underneath,
+ *                    like a handheld console.
+ * Phone (landscape): game screen in the middle, d-pad left, buttons right.
+ * Desktop:           game screen centered, no on-screen controls
+ *                    (keyboard or gamepad instead).
+ */
+
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
-
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
-
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
+  --bg: #0b0a12;
+  --control: #2a2638;
+  --control-pressed: #4a4463;
+  --control-text: #b9b2d0;
+  color-scheme: dark;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
-body {
-  margin: 0;
-}
-
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
-}
-
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
-}
-
-.counter {
-  font-size: 16px;
-  padding: 5px 10px;
-  border-radius: 5px;
-  color: var(--accent);
-  background: var(--accent-bg);
-  border: 2px solid transparent;
-  transition: border-color 0.3s;
-  margin-bottom: 24px;
-
-  &:hover {
-    border-color: var(--accent-border);
-  }
-  &:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
-}
-
-.hero {
-  position: relative;
-
-  .base,
-  .framework,
-  .vite {
-    inset-inline: 0;
-    margin: 0 auto;
-  }
-
-  .base {
-    width: 170px;
-    position: relative;
-    z-index: 0;
-  }
-
-  .framework,
-  .vite {
-    position: absolute;
-  }
-
-  .framework {
-    z-index: 1;
-    top: 34px;
-    height: 28px;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
-      scale(1.4);
-  }
-
-  .vite {
-    z-index: 0;
-    top: 107px;
-    height: 26px;
-    width: auto;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
-      scale(0.8);
-  }
-}
-
-#app {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
+* {
   box-sizing: border-box;
 }
 
-#center {
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  overflow: hidden;
+  /* Stop the phone from selecting text, zooming or scrolling while playing. */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: none;
+  overscroll-behavior: none;
+}
+
+#app {
+  height: 100dvh;
   display: flex;
   flex-direction: column;
-  gap: 25px;
-  place-content: center;
-  place-items: center;
-  flex-grow: 1;
-
-  @media (max-width: 1024px) {
-    padding: 32px 20px 24px;
-    gap: 18px;
-  }
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+    env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
-#next-steps {
+#screen-area {
+  flex: 1;
+  min-height: 0;
   display: flex;
-  border-top: 1px solid var(--border);
-  text-align: left;
-
-  & > div {
-    flex: 1 1 0;
-    padding: 32px;
-    @media (max-width: 1024px) {
-      padding: 24px 20px;
-    }
-  }
-
-  .icon {
-    margin-bottom: 16px;
-    width: 22px;
-    height: 22px;
-  }
-
-  @media (max-width: 1024px) {
-    flex-direction: column;
-    text-align: center;
-  }
+  align-items: center;
+  justify-content: center;
 }
 
-#docs {
-  border-right: 1px solid var(--border);
-
-  @media (max-width: 1024px) {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
+/* The canvas is 320x192 pixels. screen.js sets its CSS size so it scales up
+   by whole numbers where possible; "pixelated" keeps the pixels crisp. */
+#screen {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  background: #000;
 }
 
-#next-steps ul {
-  list-style: none;
-  padding: 0;
-  display: flex;
-  gap: 8px;
-  margin: 32px 0 0;
+/* ---------- On-screen controls ---------- */
 
-  .logo {
-    height: 18px;
-  }
-
-  a {
-    color: var(--text-h);
-    font-size: 16px;
-    border-radius: 6px;
-    background: var(--social-bg);
-    display: flex;
-    padding: 6px 12px;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    transition: box-shadow 0.3s;
-
-    &:hover {
-      box-shadow: var(--shadow);
-    }
-    .button-icon {
-      height: 18px;
-      width: 18px;
-    }
-  }
-
-  @media (max-width: 1024px) {
-    margin-top: 20px;
-    flex-wrap: wrap;
-    justify-content: center;
-
-    li {
-      flex: 1 1 calc(50% - 8px);
-    }
-
-    a {
-      width: 100%;
-      justify-content: center;
-      box-sizing: border-box;
-    }
-  }
-}
-
-#spacer {
-  height: 88px;
-  border-top: 1px solid var(--border);
-  @media (max-width: 1024px) {
-    height: 48px;
-  }
-}
-
-.ticks {
+#touch-controls {
+  display: none;
   position: relative;
+  font-family: ui-monospace, Consolas, monospace;
+}
+
+/* Only show them on touch screens. */
+@media (pointer: coarse) {
+  #touch-controls {
+    display: flex;
+  }
+}
+
+/* A class main.js adds when you press ?touch in the URL, for testing on desktop. */
+.force-touch #touch-controls {
+  display: flex;
+}
+
+/* Portrait: controls sit below the screen. */
+#touch-controls {
+  flex: 0 0 auto;
+  height: 42dvh;
+  max-height: 300px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px 24px;
+}
+
+.dpad {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  flex: 0 0 auto;
+}
+
+.dpad-arm {
+  position: absolute;
+  background: var(--control);
+  border-radius: 8px;
+}
+
+.dpad-v {
+  left: 33.3%;
+  width: 33.3%;
+  height: 100%;
+}
+
+.dpad-h {
+  top: 33.3%;
+  height: 33.3%;
   width: 100%;
+}
 
-  &::before,
-  &::after {
-    content: '';
+/* input.js sets data-dir on the d-pad so the pressed arms light up. */
+.dpad[data-dir*='up'] .dpad-v {
+  background: linear-gradient(var(--control-pressed) 33%, var(--control) 33%);
+}
+.dpad[data-dir*='down'] .dpad-v {
+  background: linear-gradient(0deg, var(--control-pressed) 33%, var(--control) 33%);
+}
+.dpad[data-dir*='left'] .dpad-h {
+  background: linear-gradient(90deg, var(--control-pressed) 33%, var(--control) 33%);
+}
+.dpad[data-dir*='right'] .dpad-h {
+  background: linear-gradient(-90deg, var(--control-pressed) 33%, var(--control) 33%);
+}
+
+.buttons {
+  display: flex;
+  gap: 18px;
+  /* Tilt like a Game Boy: B low-left, A high-right. */
+  align-items: flex-start;
+}
+
+.btn {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  border: none;
+  background: var(--control);
+  color: var(--control-text);
+  font: inherit;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.btn-b {
+  margin-top: 36px;
+}
+
+.btn.pressed,
+.btn-menu.pressed {
+  background: var(--control-pressed);
+}
+
+.btn-menu {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  padding: 8px 16px;
+  border: none;
+  border-radius: 14px;
+  background: var(--control);
+  color: var(--control-text);
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+
+/* Landscape phones: the screen shrinks to leave a gutter on each side,
+   with the d-pad in the left gutter and the buttons in the right. */
+@media (orientation: landscape) and (pointer: coarse) {
+  #screen-area {
+    padding-inline: 120px;
+  }
+  #touch-controls {
     position: absolute;
-    top: -4.5px;
-    border: 5px solid transparent;
+    inset: 0;
+    height: auto;
+    max-height: none;
+    padding: 0 max(8px, env(safe-area-inset-right)) 0
+      max(8px, env(safe-area-inset-left));
+    pointer-events: none;
   }
-
-  &::before {
-    left: 0;
-    border-left-color: var(--border);
+  .dpad {
+    width: 108px;
+    height: 108px;
   }
-  &::after {
-    right: 0;
-    border-right-color: var(--border);
+  .buttons {
+    flex-direction: column-reverse;
+    align-items: center;
+    gap: 14px;
+    margin-right: 8px;
+  }
+  .btn {
+    width: 58px;
+    height: 58px;
+  }
+  .btn-b {
+    margin-top: 0;
+    margin-right: 40px;
+  }
+  /* Menu goes in the top-right corner, out of the game screen. */
+  .btn-menu {
+    top: max(8px, env(safe-area-inset-top));
+    bottom: auto;
+    left: auto;
+    right: max(8px, env(safe-area-inset-right));
+    transform: none;
+  }
+  .dpad,
+  .buttons,
+  .btn-menu {
+    pointer-events: auto;
   }
 }
