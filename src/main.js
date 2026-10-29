@@ -10,7 +10,10 @@ import { startLoop } from './engine/loop.js'
 import { Screen } from './engine/screen.js'
 import { TileSet } from './engine/tileset.js'
 import { MAPS } from './game/maps/index.js'
+import { createBackgrounds } from './game/backgrounds.js'
+import { createSpeakers } from './game/cast.js'
 import { createAshSprites, createHeroSprites } from './game/sprites.js'
+import { loadScenes } from './game/talk/index.js'
 import { TILE_TYPES } from './game/tiles.js'
 import { World } from './game/world.js'
 
@@ -32,6 +35,9 @@ const world = new World({
   tileset: new TileSet(TILE_TYPES),
   heroSprites: createHeroSprites(),
   ashSprites: createAshSprites(),
+  scenes: loadScenes(),
+  speakers: createSpeakers(),
+  backgrounds: createBackgrounds(),
 })
 world.enterMap('cottage', 10, 8, 'down')
 

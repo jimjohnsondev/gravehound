@@ -1,11 +1,19 @@
 import { TILE_SIZE } from '../engine/config.js'
 import { Camera } from '../engine/camera.js'
+import { DialogBox } from '../engine/dialog-box.js'
 import { Fade } from '../engine/fade.js'
 import { MAX_LIGHT_LEVEL } from '../engine/palette.js'
+import { StoryState } from '../engine/story-state.js'
+import { Conversation } from '../engine/talk-runner.js'
 import { TileMap } from '../engine/tilemap.js'
 import { Ash } from './ash.js'
 import { Hero } from './hero.js'
 import { MapBanner } from './map-banner.js'
+import { STATS } from './story-flags.js'
+import { TALK_ACTIONS } from './talk-actions.js'
+
+/** PLACEHOLDER until there's a title screen where the player names the hero. */
+const PLACEHOLDER_HERO_NAME = 'Rowan'
 
 /**
  * @typedef {object} MapExit
@@ -47,15 +55,22 @@ export class World {
    * @param {import('../engine/tileset.js').TileSet} options.tileset
    * @param {import('../engine/sprite.js').SpriteSheet} options.heroSprites
    * @param {import('../engine/sprite.js').SpriteSheet} options.ashSprites
+   * @param {import('../engine/talk-parser.js').Scenes} options.scenes  All dialog.
+   * @param {Record<string, import('../engine/dialog-box.js').Speaker>} options.speakers
+   * @param {Record<string, CanvasImageSource>} options.backgrounds  Dialog backgrounds.
    */
-  constructor({ maps, tileset, heroSprites, ashSprites }) {
+  constructor({ maps, tileset, heroSprites, ashSprites, scenes, speakers, backgrounds }) {
     this.maps = maps
     this.tileset = tileset
+    this.scenes = scenes
     this.hero = new Hero(heroSprites)
     this.ash = new Ash(ashSprites)
     this.camera = new Camera()
     this.fade = new Fade()
     this.banner = new MapBanner()
+    this.dialog = new DialogBox({ speakers, backgrounds })
+    this.story = new StoryState(STATS)
+    this.heroName = PLACEHOLDER_HERO_NAME
 
     /** @type {MapDefinition} */
     this.mapDefinition = maps[Object.keys(maps)[0]]
@@ -75,6 +90,7 @@ export class World {
     const definition = this.maps[mapId]
     if (!definition) throw new Error(`No map called "${mapId}"`)
 
+    const cameFrom = this.mapDefinition.id
     this.mapDefinition = definition
     this.tileMap = new TileMap(definition.rows)
     this.lightLevel = definition.lightLevel
@@ -88,12 +104,38 @@ export class World {
     })
     this.camera.follow(definition.mode, this.tileMap, this.hero.center)
     this.banner.show(definition.name)
+
+    // The birthday supper plays when the hero brings the kindling home.
+    if (mapId === 'cottage' && cameFrom === 'woodEdge' && !this.story.isSet('supper_done')) {
+      this.talk('supper')
+    }
+  }
+
+  /**
+   * Start a dialog scene from a .talk file. Play stops until it's over.
+   * @param {string} sceneName
+   */
+  talk(sceneName) {
+    const steps = this.scenes[sceneName]
+    if (!steps) throw new Error(`No dialog scene called "${sceneName}"`)
+    this.banner.hide()
+    this.dialog.start(new Conversation(sceneName, steps, this.story, {
+      act: (action) => TALK_ACTIONS[action](this),
+      setBackground: (name) => this.dialog.setBackground(name),
+      textValues: { hero: this.heroName },
+    }))
   }
 
   /** @param {import('../engine/input.js').Input} input */
   update(input) {
     this.fade.update()
     if (this.fade.busy) return
+
+    // While someone is talking, the dialog box gets all the input.
+    if (this.dialog.active) {
+      this.dialog.update(input)
+      return
+    }
 
     if (input.wasPressed('menu')) this.paused = !this.paused
     if (this.paused) return
@@ -138,6 +180,7 @@ export class World {
     characters.sort((a, b) => a.depth - b.depth).forEach((c) => c.draw())
 
     this.banner.draw(ctx)
+    this.dialog.draw(ctx)
 
     if (this.paused) {
       ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'

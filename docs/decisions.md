@@ -34,7 +34,10 @@ A running log of what we've decided and why. Add new entries at the bottom.
 - **JavaScript with JSDoc types, built with Vite.** There's no framework. Types
   are checked with `npm run check`.
 - **Human-readable code over clever code.**
-- **Custom `.talk` dialog format.** The syntax isn't designed yet.
+- **Custom `.talk` dialog format, kept flat.** No nesting and no branching: a
+  scene plays top to bottom, choices only set flags or label their replies,
+  and any line can start with an `[if …]`. Every name is declared in
+  `src/game` and checked on load. See `docs/talk-format.md`.
 - **POKEY-inspired sound**, built on Web Audio, that still sounds authentically
   8-bit.
 - **Hosted on GitHub Pages.**

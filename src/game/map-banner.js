@@ -1,6 +1,7 @@
 import { SCREEN_WIDTH, UPDATES_PER_SECOND } from '../engine/config.js'
 import { GLYPH_HEIGHT } from '../engine/font-glyphs.js'
 import { UI_COLORS } from '../engine/palette.js'
+import { drawPanel } from '../engine/panel.js'
 import { drawText, measureText } from '../engine/text.js'
 
 /**
@@ -44,6 +45,11 @@ export class MapBanner {
     this.timeLeft = SHOW_DURATION
   }
 
+  /** Take the banner away at once, e.g. when a conversation starts. */
+  hide() {
+    this.timeLeft = 0
+  }
+
   update() {
     if (this.timeLeft > 0) this.timeLeft--
   }
@@ -56,10 +62,7 @@ export class MapBanner {
     const x = Math.round((SCREEN_WIDTH - width) / 2)
     const y = MARGIN_TOP - this.#hiddenAmount()
 
-    ctx.fillStyle = UI_COLORS.panelBorder
-    ctx.fillRect(x, y, width, BANNER_HEIGHT)
-    ctx.fillStyle = UI_COLORS.panel
-    ctx.fillRect(x + 1, y + 1, width - 2, BANNER_HEIGHT - 2)
+    drawPanel(ctx, x, y, width, BANNER_HEIGHT)
     drawText(ctx, this.text, x + 1 + PADDING_X, y + 1 + PADDING_Y, UI_COLORS.text)
   }
 

@@ -16,5 +16,9 @@ export const TILE_SIZE = 16
 export const SCREEN_TILES_WIDE = SCREEN_WIDTH / TILE_SIZE
 export const SCREEN_TILES_HIGH = SCREEN_HEIGHT / TILE_SIZE
 
+/** Size of a character portrait in the dialog box, in pixels. */
+export const PORTRAIT_WIDTH = 72
+export const PORTRAIT_HEIGHT = 96
+
 /** Game logic runs this many times per second, whatever the display rate. */
 export const UPDATES_PER_SECOND = 60

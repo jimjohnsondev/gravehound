@@ -1,0 +1,60 @@
+# Wren's cottage, Act I.
+# The supper plays when the hero comes home through the door with the kindling.
+
+== supper ==
+[background cottage_hearth]
+
+The fire is lit. Honey cakes are cooling on the table, and Ash is already under it.
+WREN (happy): There you are! And kindling too. Set it by the hearth, love.
+
+# Dying to the wisp on the errand sets died_on_errand (the first Underreach trip).
+[if died_on_errand] WREN (worried): You're white as milk. What happened out there?
+[if died_on_errand] * truth: "There was a wisp. Then everything went grey."
+[if died_on_errand] * fib: "Nothing. I tripped in the dark."
+[if picked truth] WREN (afraid): ...Grey.
+[if picked truth] WREN (worried): Sit down. Eat something. You're home now.
+[if picked fib] WREN (sad): Mm. You never could lie to me, you know.
+[if not died_on_errand] HERO: Ash spotted a wisp in the trees. We gave it a wide berth.
+[if not died_on_errand] WREN: Good lad. Good lads, both of you.
+
+WREN (happy): Eighteen. I can hardly credit it.
+WREN: I've kept something for you since you were small enough to sleep in the bread basket.
+She sets a bundle of oilcloth in front of you. Inside is a plain knife with a worn horn handle.
+WREN (sad): It was your father's.
+[give fathers_knife]
+
+* thanks: "Thank you, Gran. I'll look after it."
+* father: "What was he like?" [set asked_about_father]
+[if picked thanks] WREN (happy): See that it looks after you.
+[if picked father] WREN (happy): Stubborn. Kind to dogs and fools. You've got his hands.
+[if picked father] WREN (sad): ...Eat your cake.
+
+Her eyes go to the door. It's the third time tonight.
+* door: "Are you expecting someone?" [set asked_about_door]
+[if heart >= 2] * scared: "You're frightened, Gran. Tell me why." [set pressed_wren]
+* Say nothing.
+[if picked door] WREN (worried): Expecting? No. No one comes out this far after dark.
+[if picked scared] WREN (sad): Some nights are older than others, that's all. Humour an old woman.
+
+HERO: Ash doesn't look a day older than when I was little. How old is he now?
+WREN (happy): More cake?
+
+Ash pads over to the door and whines to be let out.
+* Let Ash out.
+* "He wants out, Gran."
+WREN (afraid): No!
+WREN (worried): ...Not tonight. He can go out in the morning.
+She drops the heavy bar across the door. Ash lies down against it, facing out.
+[do bar_door]
+WREN (happy): There. Snug as a hearth-cat. Happy birthday, {hero}.
+[set supper_done]
+
+
+# Looking at the wedding portrait on the cottage wall. It's an object, so it's all narration.
+# Nothing triggers this yet; interacting with A comes next on the roadmap.
+== wedding_portrait ==
+Your mother and father on their wedding day, stiff in their best clothes.
+A black dog sits at their feet.
+# A story event: only after the midpoint revelation at the Drowned Chapel.
+[if ledger_read] The paint is cracked with age. It's older than you are.
+[if ledger_read] The dog in it hasn't changed at all.

@@ -58,6 +58,9 @@ export const CHARACTER_COLORS = {
   dogLight: '#6a6290',
   dogEye: '#9be36b',
   wisp: '#c8f0ff',
+  greyHair: '#cfc8d8',
+  shawl: '#4a5a9a',
+  eyeWhite: '#f4f0e8',
 }
 
 /**
@@ -67,6 +70,8 @@ export const CHARACTER_COLORS = {
  */
 export const UI_COLORS = {
   text: '#f2e8d0',
+  /** Menu choices that aren't selected. */
+  textDim: '#8d86a6',
   panel: '#0b0a12',
   panelBorder: '#6c6688',
 }

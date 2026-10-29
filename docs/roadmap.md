@@ -20,7 +20,7 @@ Done in the starter project:
 Still to do for milestone 1:
 
 - [x] Pixel font and text rendering, with a map-name banner on entering a map
-- [ ] Dialog box: big portrait over the background, plus the `.talk` file
+- [x] Dialog box: big portrait over the background, plus the `.talk` file
       format and its parser
 - [ ] Interact with A: talk to NPCs, read signs, open chests
 - [ ] NPCs that stand still or wander

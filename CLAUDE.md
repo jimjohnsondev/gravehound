@@ -47,8 +47,10 @@ The owner wants code that a person can read and understand. That beats clever.
   their colours and stay bright. Background art is painted with
   `(ramp, step)` from `engine/palette.js`, never raw colours.
 - Screen fades take everything to black, characters included (`engine/fade.js`).
-- Dialog (not built yet) uses large character portraits over an environmental
-  background, with lines stored in a custom `.talk` file format.
+- Dialog uses large character portraits over an environmental background,
+  with lines in flat `.talk` files (`src/game/talk/`, format in
+  `docs/talk-format.md`). Names they use are declared in `src/game` and
+  checked when the game loads.
 - Sound (not built yet): a synth modelled on the Atari POKEY, adapted for Web
   Audio, that still sounds authentically 8-bit.
 - Art and music/SFX editors are **desktop-only** tools run with npm scripts,
@@ -72,9 +74,12 @@ src/
   style.css          page layout and on-screen controls
   engine/            reusable machinery: screen, loop, input, palette,
                      tileset, tilemap, camera, sprite, fade,
-                     font-glyphs (the pixel font as data), text
+                     font-glyphs (the pixel font as data), text, panel,
+                     talk-parser, talk-runner, story-state, dialog-box
   game/              Gravehound itself: world, hero, ash, tiles, sprites,
-                     map-banner
+                     map-banner, cast, portraits, backgrounds, story-flags,
+                     talk-actions
+    talk/            .talk dialog files; register new ones in talk/index.js
     maps/            one file per map; register new ones in maps/index.js
 tools/               desktop-only editors and the art import pipeline (planned)
 docs/                story, decisions, roadmap

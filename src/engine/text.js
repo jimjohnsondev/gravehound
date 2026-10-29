@@ -39,6 +39,30 @@ export function measureText(text) {
 }
 
 /**
+ * Split text into lines that each fit in `maxWidth` pixels, breaking between
+ * words. A single word wider than `maxWidth` gets a line of its own.
+ * @param {string} text
+ * @param {number} maxWidth
+ * @returns {string[]}
+ */
+export function wrapText(text, maxWidth) {
+  /** @type {string[]} */
+  const lines = []
+  let line = ''
+  for (const word of text.split(/\s+/).filter(Boolean)) {
+    const longer = line ? `${line} ${word}` : word
+    if (line && measureText(longer) > maxWidth) {
+      lines.push(line)
+      line = word
+    } else {
+      line = longer
+    }
+  }
+  if (line) lines.push(line)
+  return lines
+}
+
+/**
  * Draw one line of text. Characters the font lacks are drawn as '?'.
  * @param {CanvasRenderingContext2D} ctx
  * @param {string} text
