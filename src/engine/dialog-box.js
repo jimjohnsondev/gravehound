@@ -274,9 +274,10 @@ function drawArrow(ctx, box) {
   const x = box.x + box.width - TEXT_INSET_X - ARROW_WIDTH
   const y = box.y + box.height - TEXT_INSET_Y - ARROW_HEIGHT
   ctx.fillStyle = UI_COLORS.text
-  ctx.fillRect(x, y, ARROW_WIDTH, 1)
-  ctx.fillRect(x + 1, y + 1, 3, 1)
-  ctx.fillRect(x + 2, y + 2, 1, 1)
+  // Each row is one pixel narrower on both sides than the row above.
+  for (let row = 0; row < ARROW_HEIGHT; row++) {
+    ctx.fillRect(x + row, y + row, ARROW_WIDTH - row * 2, 1)
+  }
 }
 
 /**

@@ -31,7 +31,10 @@ function paintTimber(p) {
   }
 }
 
-/** The tile a closed chest ('C') turns into when opened. */
+/** A chest that hasn't been opened. */
+export const CLOSED_CHEST_TILE = 'C'
+
+/** What a closed chest turns into when opened. */
 export const OPEN_CHEST_TILE = 'c'
 
 /** @type {Record<string, import('../engine/tileset.js').TileType>} */

@@ -20,6 +20,9 @@ const DIAGONAL_SCALE = Math.SQRT1_2
 /** Update steps between walk animation frames. */
 const STEPS_PER_FRAME = 8
 
+/** Frames in the walk animation. */
+const WALK_FRAME_COUNT = 2
+
 /** The hero: moves with the d-pad and slides along walls. */
 export class Hero extends Character {
   /** @param {import('../engine/sprite.js').SpriteSheet} sprites */
@@ -36,7 +39,7 @@ export class Hero extends Character {
   }
 
   /**
-   * Move with the d-pad, stopping at solid tiles.
+   * Move with the d-pad, stopping at anything in the way.
    * @param {{x: number, y: number}} direction  Each -1, 0 or 1.
    * @param {(box: {x: number, y: number, width: number, height: number}) => boolean} isBlocked
    */
@@ -72,6 +75,6 @@ export class Hero extends Character {
    * @param {{x: number, y: number}} camera
    */
   draw(ctx, camera) {
-    this.drawFrame(ctx, camera, Math.floor(this.walkTimer / STEPS_PER_FRAME) % 2)
+    this.drawFrame(ctx, camera, Math.floor(this.walkTimer / STEPS_PER_FRAME) % WALK_FRAME_COUNT)
   }
 }

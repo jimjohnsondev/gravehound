@@ -9,6 +9,9 @@ const FOLLOW_DELAY = 18
 /** Update steps between walk animation frames. */
 const STEPS_PER_FRAME = 6
 
+/** Frames in the walk animation. */
+const WALK_FRAME_COUNT = 2
+
 /** Ash's feet are this many pixels below his position. */
 const FEET_OFFSET = 3
 
@@ -75,7 +78,7 @@ export class Ash {
    * @param {{x: number, y: number}} camera
    */
   draw(ctx, camera) {
-    const frame = Math.floor(this.walkTimer / STEPS_PER_FRAME) % 2
+    const frame = Math.floor(this.walkTimer / STEPS_PER_FRAME) % WALK_FRAME_COUNT
     const left = this.x - this.sprites.frameWidth / 2 - camera.x
     const top = this.y + FEET_OFFSET - this.sprites.frameHeight - camera.y
     this.sprites.draw(ctx, this.facing, frame, left, top)

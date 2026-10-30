@@ -174,7 +174,8 @@ export class Input {
   /** Read the first connected gamepad, if any. */
   #readGamepad() {
     const held = new Set()
-    const pad = navigator.getGamepads?.().find((gamepad) => gamepad !== null)
+    // Loose != on purpose: empty slots may be null or undefined, depending on the browser.
+    const pad = navigator.getGamepads?.().find((gamepad) => gamepad != null)
     if (!pad) return held
 
     for (const [index, button] of Object.entries(GAMEPAD_BINDINGS)) {
