@@ -43,6 +43,9 @@ A running log of what we've decided and why. Add new entries at the bottom.
   8-bit. The chip's real bit patterns are worked out once into looping buffers
   and played at the speed its divider gives. AudioWorklet was ruled out because
   browsers refuse it on plain http, which is how a phone reaches `npm run dev`.
+  Unlike the real chip, whose counters run at 1.79 MHz and are only sampled on
+  each tick, every note in a distortion uses the same pattern. Notes stay in
+  tune and easy to write for, at the cost of some of the real chip's unevenness.
 - **Four sound channels:** three for music, one kept for effects, so an effect
   never takes a note out of the tune.
 - **Hosted on GitHub Pages.**

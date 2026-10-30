@@ -8,7 +8,7 @@
  */
 import { UPDATES_PER_SECOND } from './config.js'
 import { MusicPlayer } from './music-player.js'
-import { CHANNEL_COUNT, CLOCK_64K, Pokey } from './pokey.js'
+import { CHANNEL_COUNT, CLOCK_64K, MAX_AUDF, MAX_VOLUME, Pokey, isDistortion } from './pokey.js'
 
 /** The channel kept for effects, so an effect never takes a note out of the tune. */
 const EFFECT_CHANNEL = CHANNEL_COUNT - 1
@@ -37,6 +37,7 @@ export class Sound {
    * @param {Record<string, import('./song.js').Song>} options.songs
    */
   constructor({ effects, songs }) {
+    checkEffects(effects)
     this.effects = effects
     this.songs = songs
     this.muted = false
@@ -58,7 +59,7 @@ export class Sound {
   attachUnlock() {
     for (const eventName of UNLOCK_EVENTS) {
       // Capture, because the touch controls stop some events reaching the window.
-      window.addEventListener(eventName, () => this.#unlock(), { capture: true })
+      window.addEventListener(eventName, () => this.unlock(), { capture: true })
     }
     document.addEventListener('visibilitychange', () => {
       if (!this.context) return
@@ -68,10 +69,18 @@ export class Sound {
   }
 
   /**
-   * Later touches matter as well as the first: phones can suspend audio again
-   * after a call or a trip to another app.
+   * True until the browser has let sound start. Gamepad buttons send no events,
+   * so a player using only a pad can be stuck here until they touch something.
    */
-  #unlock() {
+  get needsTouch() {
+    return Boolean(window.AudioContext) && this.context?.state !== 'running'
+  }
+
+  /**
+   * Try to start the audio system. Later touches matter as well as the first:
+   * phones can suspend audio again after a call or a trip to another app.
+   */
+  unlock() {
     if (!window.AudioContext) return
     if (!this.context) this.#createAudio()
     if (this.context.state !== 'running') this.context.resume()
@@ -137,5 +146,20 @@ export class Sound {
       this.playingSong = this.wantedSong
     }
     this.music.update(now)
+  }
+}
+
+/**
+ * Stop the game at load if an effect couldn't be played, instead of the first
+ * time someone triggers it.
+ * @param {Record<string, SoundEffect>} effects
+ */
+function checkEffects(effects) {
+  for (const [name, effect] of Object.entries(effects)) {
+    effect.forEach(([audf, distortion, volume], index) => {
+      const isValid = audf >= 0 && audf <= MAX_AUDF && isDistortion(distortion)
+        && volume >= 0 && volume <= MAX_VOLUME
+      if (!isValid) throw new Error(`Sound effect "${name}" row ${index + 1} can't be played`)
+    })
   }
 }

@@ -85,6 +85,8 @@ export class Input {
     this.held = new Set()
     /** Buttons that went down during this update step. */
     this.pressed = new Set()
+    /** True while a gamepad control is being used. */
+    this.usingGamepad = false
 
     window.addEventListener('keydown', (event) => {
       const button = KEY_BINDINGS[event.code]
@@ -207,7 +209,9 @@ export class Input {
   /** Call once at the start of every update step. */
   update() {
     const previous = this.held
-    this.held = new Set([...this.keyboard, ...this.touch, ...this.#readGamepad()])
+    const gamepad = this.#readGamepad()
+    this.usingGamepad = gamepad.size > 0
+    this.held = new Set([...this.keyboard, ...this.touch, ...gamepad])
     // Skipping buttons already held also ignores the keyboard's auto-repeat.
     this.pressed = new Set([...this.held, ...this.wentDown].filter((b) => !previous.has(b)))
     this.wentDown.clear()

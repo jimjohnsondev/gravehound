@@ -8,7 +8,7 @@
  * `A4` starts a note, `G#3` is a sharp, `--` holds the note before it, and
  * `..` is a rest. Song format: docs/sound-format.md
  */
-import { CLOCK_15K, CLOCK_64K, MAX_AUDF, isDistortion, ticksPerCycle } from './pokey.js'
+import { CLOCK_15K, CLOCK_64K, MAX_AUDF, MAX_VOLUME, isDistortion, ticksPerCycle } from './pokey.js'
 
 /** `A4` or `G#3` */
 const NOTE = /^([A-G])(#?)([0-9])$/
@@ -72,6 +72,10 @@ const SEMITONES_PER_OCTAVE = 12
  * @returns {Song}
  */
 export function parseSong(name, source, maxChannels) {
+  if (!(source.stepsPerSecond > 0 && Number.isFinite(source.stepsPerSecond))) {
+    throw new Error(`Song "${name}" has stepsPerSecond ${source.stepsPerSecond}; it must be above 0`)
+  }
+  if (source.channels.length === 0) throw new Error(`Song "${name}" has no channels`)
   if (source.channels.length > maxChannels) {
     throw new Error(`Song "${name}" has ${source.channels.length} channels; the most is ${maxChannels}`)
   }
@@ -96,6 +100,8 @@ export function parseSong(name, source, maxChannels) {
  */
 function parseChannel(label, { distortion, volume, decay, notes }) {
   if (!isDistortion(distortion)) throw new Error(`${label}: no distortion ${distortion}`)
+  if (!(volume >= 0 && volume <= MAX_VOLUME)) throw new Error(`${label}: volume must be 0 to ${MAX_VOLUME}`)
+  if (!(decay >= 0)) throw new Error(`${label}: decay can't be ${decay}`)
 
   /** @type {(SongNote | null)[]} */
   const parsed = []

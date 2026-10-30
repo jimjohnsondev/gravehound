@@ -2,26 +2,32 @@
  * A sound chip modelled on the Atari POKEY, built from Web Audio nodes.
  *
  * On the real chip, a clock is divided down to make "ticks". Each tick reads a
- * 1-bit pattern: a plain on-off flip for a pure tone, or a polynomial counter
- * for the buzzes and hisses that give the chip its sound. Those patterns are
- * fixed, so here each one is worked out once into a looping buffer, and the
- * divider becomes the buffer's playback speed. That keeps the chip's real
- * patterns and its slightly out-of-tune notes, and works on plain http pages,
- * where the browser refuses AudioWorklet (such as a phone testing `npm run dev`).
+ * 1-bit value: a plain on-off flip for a pure tone, or a polynomial counter for
+ * the buzzes and hisses that give the chip its sound. Here each distortion is
+ * worked out once into a looping buffer, and the divider becomes the buffer's
+ * playback speed. That keeps the chip's slightly out-of-tune notes, and works
+ * on plain http pages, where the browser refuses AudioWorklet (such as a phone
+ * testing `npm run dev`).
+ *
+ * One real difference from the chip: its counters run all the time at 1.79 MHz
+ * and each tick only samples them, so what a channel hears shifts with the
+ * divider, and some buzzy notes come out far from the expected pitch. Here the
+ * counters step once per tick, so every note in a distortion uses the same
+ * pattern. Notes stay in tune, but lose some of the real chip's unevenness.
  *
  * Game code talks to it the way a real program talks to the chip: by writing
  * registers. Writes are scheduled at a time, so they land exactly on the beat.
  */
 
-/** The chip's two usual clocks, in ticks per second (NTSC Atari). */
+/** The chip's two usual clocks: an NTSC Atari's 1.79 MHz divided by 28 and by 114. */
 export const CLOCK_64K = 63921
-export const CLOCK_15K = 15722
+export const CLOCK_15K = 15700
 
 /** Highest value of the divider register, AUDF. */
 export const MAX_AUDF = 255
 
 /** Highest channel volume. */
-const MAX_VOLUME = 15
+export const MAX_VOLUME = 15
 
 /** How many channels the chip has. */
 export const CHANNEL_COUNT = 4
@@ -34,21 +40,23 @@ const CHANNEL_LEVEL = 1 / CHANNEL_COUNT
  * What one distortion setting does on each tick.
  * @property {boolean} fiveBitGate  Only act on ticks where the 5-bit counter is on.
  * @property {'flip' | 'fourBit' | 'seventeenBit'} source  Where the output comes from.
- * @property {number} patternTicks  Ticks until the pattern repeats. The two
- *   17-bit patterns are so long that they're cut to a size that sounds the same.
+ * @property {number} patternTicks  Ticks until the pattern repeats. Distortion 0
+ *   really repeats much later, but is cut here to a size that sounds the same.
  * @property {number} samplesPerTick  Buffer samples per tick. Web Audio blends
- *   between samples, so slow patterns need many to keep their hard edges.
+ *   between samples, so tones need many to keep their hard edges. The 17-bit
+ *   patterns use few to save memory, which softens slow noise a little.
  * @property {number} ticksPerCycle  Ticks in one cycle of the note you hear.
  */
 
 /**
  * The chip's distortion settings, by the number written to its control register.
+ * The chip's settings 6 and 14 are left out because they repeat 2 and 10.
  * @type {Record<number, Distortion>}
  */
 const DISTORTIONS = {
   0: { fiveBitGate: true, source: 'seventeenBit', patternTicks: 131071, samplesPerTick: 2, ticksPerCycle: 2 },
-  2: { fiveBitGate: true, source: 'flip', patternTicks: 62, samplesPerTick: 16, ticksPerCycle: 31 },
-  4: { fiveBitGate: true, source: 'fourBit', patternTicks: 465, samplesPerTick: 8, ticksPerCycle: 31 },
+  2: { fiveBitGate: true, source: 'flip', patternTicks: 31, samplesPerTick: 16, ticksPerCycle: 31 },
+  4: { fiveBitGate: true, source: 'fourBit', patternTicks: 465, samplesPerTick: 8, ticksPerCycle: 15 },
   8: { fiveBitGate: false, source: 'seventeenBit', patternTicks: 131071, samplesPerTick: 2, ticksPerCycle: 2 },
   10: { fiveBitGate: false, source: 'flip', patternTicks: 2, samplesPerTick: 32, ticksPerCycle: 2 },
   12: { fiveBitGate: false, source: 'fourBit', patternTicks: 15, samplesPerTick: 16, ticksPerCycle: 15 },

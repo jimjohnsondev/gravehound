@@ -29,14 +29,15 @@ export const hearth = {
 | You write | Meaning |
 | --- | --- |
 | `A4`, `G#3` | Start a **note**. There are sharps but no flats. |
-| `--` | **Hold** the note before it for another step. |
+| `--` | **Hold** the note before it for another step. It needs a note to hold, so it can't start a channel or follow a rest. |
 | `..` | A **rest**. |
 
 Line breaks and extra spaces don't matter, so lay a song out in bars. Every
 channel must have the same number of steps, and the song loops at the end.
 
-The game checks every song when it starts and stops with a message if one can't
-be played, such as a misspelt note or channels of different lengths.
+The game checks every song and sound effect when it starts, and stops with a
+message if one can't be played, such as a misspelt note, channels of different
+lengths or a volume above 15.
 
 ## Distortions
 
@@ -48,6 +49,8 @@ be played, such as a misspelt note or channels of different lengths.
 | 4 | Harsh, from the 4-bit and 5-bit counters | Machines, alarms |
 | 8 | Hiss, from the 17-bit counter | Wind, footsteps, doors |
 | 0 | Crackle, from the 5-bit and 17-bit counters | Fire, static |
+
+The real chip's settings 6 and 14 are left out because they repeat 2 and 10.
 
 Notes are slightly out of tune, especially high ones, because the chip can only
 divide its clock by whole numbers. That's part of the sound.
@@ -67,6 +70,7 @@ Play one from game code with `this.sound.play('cursor')`.
 ## Trying sounds
 
 Browsers stay silent until the player touches the page, so click the game first.
+A gamepad press may not count, so the menu shows a hint until sound has started.
 Then, in the browser console:
 
 ```js

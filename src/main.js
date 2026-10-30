@@ -58,6 +58,9 @@ world.enterMap('cottage', 5, 4, 'down')
 startLoop({
   update() {
     input.update()
+    // Gamepads send no events for Sound to hear. Some browsers accept this
+    // as permission to start audio; the menu shows a hint for those that don't.
+    if (input.usingGamepad) sound.unlock()
     world.update(input)
   },
   draw() {

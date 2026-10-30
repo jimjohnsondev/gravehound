@@ -37,6 +37,9 @@ const ITEM_ROWS = 6
 /** Lines of an item's description shown under the list. */
 const DESCRIPTION_LINES = 3
 
+/** Shown under the main choices if the browser hasn't let sound start yet. */
+const SOUND_HINT = 'Press a key or click for sound'
+
 /** On the status page, how far right of the text's left edge the numbers sit. */
 const STAT_VALUE_OFFSET = 48
 
@@ -176,6 +179,7 @@ export class PauseMenu {
     const labels = MAIN_CHOICES.map((choice) => (choice === 'Sound' ? soundLabel : choice))
     drawPanel(ctx, PANEL_MARGIN, PANEL_MARGIN, MAIN_PANEL_WIDTH, panelHeight(labels.length))
     drawChoices(ctx, labels, this.mainCursor, TEXT_LEFT, TEXT_TOP)
+    if (this.sound.needsTouch) drawSoundHint(ctx)
   }
 
   /** @param {CanvasRenderingContext2D} ctx */
@@ -223,6 +227,17 @@ function drawDescription(ctx, description) {
   wrapText(description, FULL_WIDTH - PANEL_TEXT_INSET * 2).forEach((line, index) => {
     drawText(ctx, line, TEXT_LEFT, y + PANEL_TEXT_INSET + index * LINE_HEIGHT, UI_COLORS.text)
   })
+}
+
+/**
+ * A one-line reminder along the bottom of the screen.
+ * @param {CanvasRenderingContext2D} ctx
+ */
+function drawSoundHint(ctx) {
+  const height = panelHeight(1)
+  const y = SCREEN_HEIGHT - PANEL_MARGIN - height
+  drawPanel(ctx, PANEL_MARGIN, y, FULL_WIDTH, height)
+  drawText(ctx, SOUND_HINT, TEXT_LEFT, y + PANEL_TEXT_INSET, UI_COLORS.textDim)
 }
 
 /**
