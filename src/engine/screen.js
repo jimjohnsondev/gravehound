@@ -4,7 +4,7 @@
 import { SCREEN_WIDTH, SCREEN_HEIGHT } from './config.js'
 
 /**
- * The canvas always has 320x192 real pixels. Only its displayed size changes,
+ * The canvas always stays at the game's resolution. Only its displayed size changes,
  * by whole numbers (2x, 3x, ...) so every game pixel is an even square. Small
  * phones where 2x won't fit use the exact fit instead, which can make a few
  * pixels uneven but fills the screen.

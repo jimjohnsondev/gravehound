@@ -4,7 +4,7 @@
 
 Done in the starter project:
 
-- [x] 320 x 192 canvas, scaled crisply to fit phone (portrait and landscape)
+- [x] 160 x 144 canvas, scaled crisply to fit phone (portrait and landscape)
       and desktop
 - [x] Fixed-rate 60 Hz game loop
 - [x] Input: keyboard, gamepad, and on-screen d-pad with A / B / Menu
@@ -22,6 +22,10 @@ Still to do for milestone 1:
 - [x] Pixel font and text rendering, with a map-name banner on entering a map
 - [x] Dialog box: big portrait over the background, plus the `.talk` file
       format and its parser
+- [x] Switch the engine to 160 x 144 (10 x 9 tiles): update `config.js`,
+      `index.html`, the cottage map (a single screen must be 10 x 9), the
+      hard-coded sizes in `game/backgrounds.js`, and re-fit the dialog box,
+      portraits and map banner to the smaller screen
 - [ ] Interact with A: talk to NPCs, read signs, open chests
 - [ ] NPCs that stand still or wander
 - [ ] Menu screen (replacing the current pause)

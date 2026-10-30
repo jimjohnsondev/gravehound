@@ -50,7 +50,7 @@ body {
   justify-content: center;
 }
 
-/* The canvas is 320x192 pixels. screen.js sets its CSS size so it scales up
+/* The canvas keeps its low game resolution. screen.js sets its CSS size so it scales up
    by whole numbers where possible; "pixelated" keeps the pixels crisp. */
 #screen {
   image-rendering: pixelated;

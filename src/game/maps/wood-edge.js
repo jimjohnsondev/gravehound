@@ -40,6 +40,6 @@ export const woodEdge = {
   ],
   exits: [
     // Back into the cottage.
-    { tileX: 9, tileY: 6, toMap: 'cottage', arriveX: 9, arriveY: 10, facing: 'up' },
+    { tileX: 9, tileY: 6, toMap: 'cottage', arriveX: 4, arriveY: 7, facing: 'up' },
   ],
 }

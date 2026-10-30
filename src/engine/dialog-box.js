@@ -1,7 +1,7 @@
 /**
- * The dialog box: a large portrait of whoever is speaking, over an
- * environmental background, with their words in a box beside them. Narration
- * and menus have no portrait and use the full width.
+ * The dialog box: a text box along the bottom of the screen, with a large
+ * portrait of whoever is speaking standing on it, over an environmental
+ * background. Narration and menus have no portrait.
  */
 import { PORTRAIT_HEIGHT, PORTRAIT_WIDTH, SCREEN_HEIGHT, SCREEN_WIDTH } from './config.js'
 import { GLYPH_HEIGHT } from './font-glyphs.js'
@@ -10,29 +10,32 @@ import { PANEL_BORDER, drawPanel } from './panel.js'
 import { drawText, measureText, wrapText } from './text.js'
 
 /** Gap between the boxes and the screen edges. */
-const MARGIN = 4
+const MARGIN = 2
 
 /** Distance from the outside of a box to its text. */
-const TEXT_INSET_X = PANEL_BORDER + 6
-const TEXT_INSET_Y = PANEL_BORDER + 5
+const TEXT_INSET_X = PANEL_BORDER + 4
+const TEXT_INSET_Y = PANEL_BORDER + 4
 
 /** Space above and below the name in the speaker's name tab. */
-const NAME_PADDING_Y = 3
+const NAME_PADDING_Y = 2
 
 /** Distance from the top of one line of text to the top of the next. */
-const LINE_HEIGHT = GLYPH_HEIGHT + 3
+const LINE_HEIGHT = GLYPH_HEIGHT + 2
 
 /** Lines shown at once. A longer line carries on over more pages. */
-const LINES_PER_PAGE = 4
+const LINES_PER_PAGE = 3
 
 /** Room on the left of each choice for the cursor. */
-const CURSOR_SPACE = 8
+const CURSOR_SPACE = 6
 
 /** Width of the "press A" arrow. */
 const ARROW_WIDTH = 5
 
 /** Height of the "press A" arrow. */
 const ARROW_HEIGHT = 3
+
+/** Room kept clear of text on the right, so the arrow never covers a word. */
+const ARROW_SPACE = ARROW_WIDTH + 2
 
 /** Update steps for each half of the "press A" arrow's blink. */
 const BLINK_DURATION = 20
@@ -52,6 +55,17 @@ const BLINK_DURATION = 20
  * @property {number} width
  * @property {number} height
  */
+
+/**
+ * The box that lines of dialog appear in.
+ * @type {Box}
+ */
+const TEXT_BOX = {
+  x: MARGIN,
+  y: SCREEN_HEIGHT - MARGIN - boxHeight(LINES_PER_PAGE),
+  width: SCREEN_WIDTH - MARGIN * 2,
+  height: boxHeight(LINES_PER_PAGE),
+}
 
 /** Shows a Conversation. A turns the page; up, down and A pick a choice. */
 export class DialogBox {
@@ -149,7 +163,7 @@ export class DialogBox {
       this.speakerName = this.conversation.fillIn(this.speaker.name)
     }
 
-    const lines = wrapText(this.shown.text, textWidth(this.#lineBox()))
+    const lines = wrapText(this.shown.text, TEXT_BOX.width - TEXT_INSET_X * 2 - ARROW_SPACE)
     this.pages = []
     for (let start = 0; start < lines.length; start += LINES_PER_PAGE) {
       this.pages.push(lines.slice(start, start + LINES_PER_PAGE))
@@ -173,14 +187,14 @@ export class DialogBox {
    * @param {string} expression
    */
   #drawLine(ctx, expression) {
-    const box = this.#lineBox()
+    const box = TEXT_BOX
 
     if (this.speaker) {
       const column = this.speaker.expressions.indexOf(expression)
       ctx.drawImage(
         this.speaker.portraits,
         column * PORTRAIT_WIDTH, 0, PORTRAIT_WIDTH, PORTRAIT_HEIGHT,
-        MARGIN, SCREEN_HEIGHT - MARGIN - PORTRAIT_HEIGHT, PORTRAIT_WIDTH, PORTRAIT_HEIGHT,
+        MARGIN, box.y - PORTRAIT_HEIGHT, PORTRAIT_WIDTH, PORTRAIT_HEIGHT,
       )
       drawNameTab(ctx, box, this.speakerName)
     }
@@ -191,18 +205,6 @@ export class DialogBox {
     })
 
     if (this.timer % (BLINK_DURATION * 2) < BLINK_DURATION) drawArrow(ctx, box)
-  }
-
-  /**
-   * Where the text box for a line goes: beside the portrait if someone is
-   * speaking, full width for narration.
-   * @returns {Box}
-   */
-  #lineBox() {
-    const height = boxHeight(LINES_PER_PAGE)
-    const y = SCREEN_HEIGHT - MARGIN - height
-    const x = this.speaker ? MARGIN + PORTRAIT_WIDTH + MARGIN : MARGIN
-    return { x, y, width: SCREEN_WIDTH - MARGIN - x, height }
   }
 
   /**
@@ -237,7 +239,7 @@ export class DialogBox {
 }
 
 /**
- * The speaker's name, in a small tab on top of the text box.
+ * The speaker's name, in a small tab on top of the text box, beside the portrait.
  * @param {CanvasRenderingContext2D} ctx
  * @param {Box} box  The text box.
  * @param {string} name
@@ -247,8 +249,9 @@ function drawNameTab(ctx, box, name) {
   const height = GLYPH_HEIGHT + NAME_PADDING_Y * 2 + PANEL_BORDER * 2
   // Overlap the box so the two borders join up.
   const y = box.y - height + PANEL_BORDER
-  drawPanel(ctx, box.x, y, width, height)
-  drawText(ctx, name, box.x + TEXT_INSET_X, y + PANEL_BORDER + NAME_PADDING_Y, UI_COLORS.text)
+  const x = box.x + PORTRAIT_WIDTH + MARGIN
+  drawPanel(ctx, x, y, width, height)
+  drawText(ctx, name, x + TEXT_INSET_X, y + PANEL_BORDER + NAME_PADDING_Y, UI_COLORS.text)
 }
 
 /**
@@ -285,12 +288,4 @@ function drawCursor(ctx, x, textY) {
 function boxHeight(lineCount) {
   const textHeight = (lineCount - 1) * LINE_HEIGHT + GLYPH_HEIGHT
   return textHeight + TEXT_INSET_Y * 2
-}
-
-/**
- * Room for text inside a box.
- * @param {Box} box
- */
-function textWidth(box) {
-  return box.width - TEXT_INSET_X * 2
 }

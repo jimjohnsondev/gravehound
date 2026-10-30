@@ -35,8 +35,10 @@ The owner wants code that a person can read and understand. That beats clever.
 
 ## Fixed technical decisions
 
-- Screen is **320 x 192** pixels (Atari-style), drawn on one canvas and scaled
-  up. Tiles are **16 x 16**, so one screen is 20 x 12 tiles.
+- Screen is **160 x 144** pixels (Game Gear size), drawn on one canvas and
+  scaled up. Tiles are **16 x 16**, so one screen is 10 x 9 tiles. Lay out
+  maps, text, the dialog box and portraits for this size. Don't hard-code
+  pixel sizes; use the constants in `engine/config.js`.
 - Game logic runs at a fixed 60 updates a second (`engine/loop.js`). Change
   state only in `update`, and only draw in `draw`.
 - Movement is 8-directional. Input is the d-pad plus **A**, **B** and **Menu**.

@@ -35,11 +35,11 @@ const FACES = {
 }
 
 /** Left edge of each eye, in portrait pixels. */
-const LEFT_EYE_X = 27
-const RIGHT_EYE_X = 42
-const EYE_Y = 38
-const BROW_Y = 34
-const MOUTH_Y = 51
+const LEFT_EYE_X = 17
+const RIGHT_EYE_X = 28
+const EYE_Y = 25
+const BROW_Y = 22
+const MOUTH_Y = 34
 
 /** Width of an eye. Brows are mirrored around its centre. */
 const EYE_WIDTH = 3
@@ -92,24 +92,24 @@ export function paintPortraits(look, expressions) {
 function paintBust(rect, look) {
   /** @type {[number, number, number, number, string][]} x, y, width, height, colour */
   const shapes = [
-    [8, 72, 56, 24, look.clothes],
-    [30, 56, 12, 16, look.skin],
-    [20, 16, 32, 44, look.skin],
-    [18, 20, 36, 36, look.skin],
+    [6, 48, 36, 16, look.clothes],
+    [20, 38, 8, 10, look.skin],
+    [14, 11, 20, 29, look.skin],
+    [12, 14, 24, 23, look.skin],
   ]
   if (look.old) {
     shapes.push(
-      [28, 4, 16, 10, look.hair], // bun
-      [18, 12, 36, 10, look.hair],
-      [16, 18, 4, 18, look.hair],
-      [52, 18, 4, 18, look.hair],
-      [14, 64, 44, 10, look.clothes], // shawl up round the neck
+      [18, 3, 12, 6, look.hair], // bun
+      [12, 8, 24, 7, look.hair],
+      [10, 12, 3, 12, look.hair],
+      [35, 12, 3, 12, look.hair],
+      [9, 43, 30, 7, look.clothes], // shawl up round the neck
     )
   } else {
     shapes.push(
-      [18, 10, 36, 14, look.hair],
-      [16, 16, 4, 22, look.hair],
-      [52, 16, 4, 22, look.hair],
+      [12, 7, 24, 9, look.hair],
+      [10, 11, 3, 15, look.hair],
+      [35, 11, 3, 15, look.hair],
     )
   }
 
@@ -147,16 +147,16 @@ function paintFace(rect, face) {
   }
 
   if (face.mouth === 'flat') {
-    rect(32, MOUTH_Y, 8, 1, dark)
+    rect(20, MOUTH_Y, 8, 1, dark)
   } else if (face.mouth === 'smile') {
-    rect(33, MOUTH_Y + 1, 6, 1, dark)
-    rect(31, MOUTH_Y, 2, 1, dark)
-    rect(39, MOUTH_Y, 2, 1, dark)
+    rect(21, MOUTH_Y + 1, 6, 1, dark)
+    rect(19, MOUTH_Y, 2, 1, dark)
+    rect(27, MOUTH_Y, 2, 1, dark)
   } else if (face.mouth === 'frown') {
-    rect(33, MOUTH_Y, 6, 1, dark)
-    rect(31, MOUTH_Y + 1, 2, 1, dark)
-    rect(39, MOUTH_Y + 1, 2, 1, dark)
+    rect(21, MOUTH_Y, 6, 1, dark)
+    rect(19, MOUTH_Y + 1, 2, 1, dark)
+    rect(27, MOUTH_Y + 1, 2, 1, dark)
   } else {
-    rect(33, MOUTH_Y - 1, 6, 4, dark)
+    rect(21, MOUTH_Y - 1, 6, 4, dark)
   }
 }

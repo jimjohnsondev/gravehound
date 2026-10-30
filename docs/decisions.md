@@ -6,8 +6,9 @@ A running log of what we've decided and why. Add new entries at the bottom.
 
 - **Retro 8-bit feel, not 8-bit limits.** It should look and sound like an
   8-bit game without copying old hardware rules that don't help.
-- **Screen resolution 320 x 192**, Atari-style. Tiles are 16 x 16, so a screen
-  is 20 x 12 tiles.
+- **Screen resolution 160 x 144** (Game Gear size). Tiles are 16 x 16, so a
+  screen is 10 x 9 tiles. Changed Oct 30, 2026 from the Atari-style 320 x 192,
+  which scaled up too small on phones.
 - **Top-down 3/4 view.** Characters are taller than their collision box, so
   heads overlap the scenery behind them.
 - **Dark scenery, glowing characters.** Lighting only shifts the background

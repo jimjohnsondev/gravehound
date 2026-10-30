@@ -18,11 +18,11 @@ const SLIDE_DURATION = 12
 const SLIDE_STEP = 4
 
 /** Gap between the top of the screen and the banner once it has dropped in. */
-const MARGIN_TOP = 8
+const MARGIN_TOP = 4
 
 /** Distance from the outside of the banner to its text. */
-const TEXT_INSET_X = PANEL_BORDER + 6
-const TEXT_INSET_Y = PANEL_BORDER + 4
+const TEXT_INSET_X = PANEL_BORDER + 4
+const TEXT_INSET_Y = PANEL_BORDER + 3
 
 const BANNER_HEIGHT = GLYPH_HEIGHT + TEXT_INSET_Y * 2
 

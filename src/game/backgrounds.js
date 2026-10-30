@@ -3,8 +3,11 @@
  * portraits stand in front of. Like all background art they're painted with
  * (ramp, step) colours. Replace with imported pictures of the same size.
  */
-import { SCREEN_HEIGHT, SCREEN_WIDTH } from '../engine/config.js'
+import { SCREEN_HEIGHT, SCREEN_WIDTH, TILE_SIZE } from '../engine/config.js'
 import { backgroundColor } from '../engine/palette.js'
+
+/** Where the back wall meets the floor, in the cottage background. */
+const WALL_BOTTOM = 100
 
 /**
  * @typedef {(rect: (x: number, y: number, w: number, h: number, ramp: string, step: number) => void) => void} BackgroundPainter
@@ -14,35 +17,35 @@ import { backgroundColor } from '../engine/palette.js'
 const PAINTERS = {
   /** Wren's cottage by firelight, looking towards the hearth. */
   cottage_hearth(rect) {
-    // Back wall of timber planks.
-    rect(0, 0, 320, 124, 'wood', 2)
-    for (let x = 0; x < 320; x += 20) rect(x, 0, 1, 124, 'wood', 4)
+    // Back wall of timber planks, down to the floor.
+    rect(0, 0, SCREEN_WIDTH, WALL_BOTTOM, 'wood', 2)
+    for (let x = 0; x < SCREEN_WIDTH; x += TILE_SIZE) rect(x, 0, 1, WALL_BOTTOM, 'wood', 4)
     // Floorboards.
-    rect(0, 124, 320, 68, 'earth', 2)
-    for (let y = 132; y < 192; y += 10) rect(0, y, 320, 1, 'earth', 3)
+    rect(0, WALL_BOTTOM, SCREEN_WIDTH, SCREEN_HEIGHT - WALL_BOTTOM, 'earth', 2)
+    for (let y = WALL_BOTTOM + 8; y < SCREEN_HEIGHT; y += 8) rect(0, y, SCREEN_WIDTH, 1, 'earth', 3)
 
     // A small night window.
-    rect(52, 24, 44, 36, 'wood', 4)
-    rect(56, 28, 36, 28, 'water', 4)
-    rect(73, 28, 2, 28, 'wood', 4)
-    rect(56, 41, 36, 2, 'wood', 4)
+    rect(10, 8, 30, 26, 'wood', 4)
+    rect(13, 11, 24, 20, 'water', 4)
+    rect(24, 11, 2, 20, 'wood', 4)
+    rect(13, 20, 24, 2, 'wood', 4)
 
     // The stone hearth with a fire in it.
-    rect(188, 28, 112, 100, 'stone', 2)
-    rect(196, 20, 96, 10, 'stone', 1)
-    rect(208, 60, 72, 68, 'stone', 5)
-    rect(220, 104, 48, 20, 'ember', 3)
-    rect(228, 92, 32, 24, 'ember', 1)
-    rect(236, 80, 16, 20, 'ember', 0)
+    rect(90, 16, 60, 84, 'stone', 2)
+    rect(86, 10, 68, 8, 'stone', 1)
+    rect(100, 44, 40, 56, 'stone', 5)
+    rect(106, 84, 28, 14, 'ember', 3)
+    rect(110, 74, 20, 20, 'ember', 1)
+    rect(115, 64, 10, 16, 'ember', 0)
 
-    // The table in front, with honey cakes.
-    rect(24, 132, 128, 10, 'wood', 1)
-    rect(24, 142, 128, 3, 'wood', 3)
-    rect(32, 145, 6, 40, 'wood', 3)
-    rect(138, 145, 6, 40, 'wood', 3)
-    rect(60, 124, 40, 8, 'ember', 2)
-    rect(66, 120, 8, 5, 'earth', 0)
-    rect(78, 120, 8, 5, 'earth', 0)
+    // The table, with honey cakes on it.
+    rect(54, 78, 30, 5, 'wood', 1)
+    rect(54, 83, 30, 2, 'wood', 3)
+    rect(57, 85, 3, 16, 'wood', 3)
+    rect(78, 85, 3, 16, 'wood', 3)
+    rect(58, 72, 22, 6, 'ember', 2)
+    rect(61, 69, 6, 3, 'earth', 0)
+    rect(71, 69, 6, 3, 'earth', 0)
   },
 }
 

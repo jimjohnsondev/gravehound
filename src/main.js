@@ -39,7 +39,7 @@ const world = new World({
   speakers: createSpeakers(),
   backgrounds: createBackgrounds(),
 })
-world.enterMap('cottage', 10, 8, 'down')
+world.enterMap('cottage', 5, 4, 'down')
 
 startLoop({
   update() {
