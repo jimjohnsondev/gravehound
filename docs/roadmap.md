@@ -29,7 +29,7 @@ Still to do for milestone 1:
 - [x] Interact with A: talk to NPCs, read signs, open chests
 - [x] NPCs that stand still or wander
 - [x] Menu screen (replacing the current pause)
-- [ ] Sound: a POKEY-style synth on Web Audio, sound effects, and a music player
+- [x] Sound: a POKEY-style synth on Web Audio, sound effects, and a music player
 - [ ] Save and load in localStorage
 - [ ] Death and the Underreach loop: fall into the netherworld, then find the way up
 - [ ] Simple one-button combat (the father's knife) and one enemy type (the wisp)

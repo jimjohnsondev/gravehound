@@ -13,6 +13,7 @@ export const cottage = {
   name: "Wren's cottage",
   mode: 'screen',
   lightLevel: 0,
+  music: 'hearth',
   rows: [
     'WWWWWWWWWW',
     'WWPWHWWWWW',

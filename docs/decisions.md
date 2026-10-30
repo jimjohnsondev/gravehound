@@ -40,7 +40,11 @@ A running log of what we've decided and why. Add new entries at the bottom.
   and any line can start with an `[if …]`. Every name is declared in
   `src/game` and checked on load. See `docs/talk-format.md`.
 - **POKEY-inspired sound**, built on Web Audio, that still sounds authentically
-  8-bit.
+  8-bit. The chip's real bit patterns are worked out once into looping buffers
+  and played at the speed its divider gives. AudioWorklet was ruled out because
+  browsers refuse it on plain http, which is how a phone reaches `npm run dev`.
+- **Four sound channels:** three for music, one kept for effects, so an effect
+  never takes a note out of the tune.
 - **Hosted on GitHub Pages.**
 
 ## Art and tools

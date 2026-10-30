@@ -8,11 +8,14 @@ import './style.css'
 import { Input } from './engine/input.js'
 import { startLoop } from './engine/loop.js'
 import { Screen } from './engine/screen.js'
+import { Sound } from './engine/sound.js'
 import { TileSet } from './engine/tileset.js'
 import { checkMaps } from './game/maps/check-maps.js'
 import { MAPS } from './game/maps/index.js'
+import { loadSongs } from './game/music/index.js'
 import { createBackgrounds } from './game/backgrounds.js'
 import { createSpeakers } from './game/cast.js'
+import { SOUND_EFFECTS } from './game/sound-effects.js'
 import { createAshSprites, createHeroSprites, createNpcSprites } from './game/sprites.js'
 import { loadScenes } from './game/talk/index.js'
 import { TILE_TYPES } from './game/tiles.js'
@@ -33,7 +36,11 @@ input.attachTouchControls(/** @type {HTMLElement} */ (document.getElementById('t
 
 const scenes = loadScenes()
 const npcSprites = createNpcSprites()
-checkMaps(MAPS, scenes, npcSprites)
+const songs = loadSongs()
+checkMaps(MAPS, scenes, npcSprites, songs)
+
+const sound = new Sound({ effects: SOUND_EFFECTS, songs })
+sound.attachUnlock()
 
 const world = new World({
   maps: MAPS,
@@ -44,6 +51,7 @@ const world = new World({
   scenes,
   speakers: createSpeakers(),
   backgrounds: createBackgrounds(),
+  sound,
 })
 world.enterMap('cottage', 5, 4, 'down')
 
@@ -58,4 +66,4 @@ startLoop({
 })
 
 // For the browser console while developing, e.g. `gravehound.world.lightLevel = 3`
-Object.assign(window, { gravehound: { world, input } })
+Object.assign(window, { gravehound: { world, input, sound } })

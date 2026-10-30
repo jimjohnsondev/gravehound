@@ -11,8 +11,9 @@ import { CLOSED_CHEST_TILE, TILE_TYPES } from '../tiles.js'
  * @param {Record<string, import('./index.js').MapDefinition>} maps
  * @param {import('../../engine/talk-parser.js').Scenes} scenes
  * @param {Record<string, import('../../engine/sprite.js').SpriteSheet>} npcSprites
+ * @param {Record<string, import('../../engine/song.js').Song>} songs
  */
-export function checkMaps(maps, scenes, npcSprites) {
+export function checkMaps(maps, scenes, npcSprites, songs) {
   /** @type {string[]} */
   const problems = []
   /** Chest flags seen so far. Two chests sharing one would open together. */
@@ -20,6 +21,7 @@ export function checkMaps(maps, scenes, npcSprites) {
 
   for (const [key, map] of Object.entries(maps)) {
     if (key !== map.id) problems.push(`${map.id}: listed in MAPS as "${key}"`)
+    if (!songs[map.music]) problems.push(`${map.id}: no song called "${map.music}"`)
     checkRowWidths(map, problems)
     checkExits(map, maps, problems)
     checkChests(map, chestFlags, problems)

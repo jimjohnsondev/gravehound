@@ -13,6 +13,7 @@ export const woodEdge = {
   name: "The wood's edge",
   mode: 'scroll',
   lightLevel: 2,
+  music: 'dusk',
   rows: [
     'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT',
     'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT',

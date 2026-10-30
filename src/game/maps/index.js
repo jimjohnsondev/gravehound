@@ -38,6 +38,7 @@ import { woodEdge } from './wood-edge.js'
  * @property {string} name
  * @property {'screen' | 'scroll'} mode  Single still screen, or scrolling.
  * @property {number} lightLevel         0 (bright) to 4 (dark). Darkens scenery only.
+ * @property {string} music              Song to play here (see game/music/index.js).
  * @property {string[]} rows             The tiles, one string per row.
  * @property {MapExit[]} exits
  * @property {import('../npc.js').NpcDefinition[]} npcs

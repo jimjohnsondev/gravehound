@@ -53,8 +53,10 @@ The owner wants code that a person can read and understand. That beats clever.
   with lines in flat `.talk` files (`src/game/talk/`, format in
   `docs/talk-format.md`). Names they use are declared in `src/game` and
   checked when the game loads.
-- Sound (not built yet): a synth modelled on the Atari POKEY, adapted for Web
-  Audio, that still sounds authentically 8-bit.
+- Sound is a chip modelled on the Atari POKEY (`engine/pokey.js`), built from
+  ordinary Web Audio nodes. Don't use AudioWorklet: browsers refuse it on plain
+  http, which is how a phone reaches `npm run dev`. Songs and effects are
+  described in `docs/sound-format.md`.
 - Art and music/SFX editors are **desktop-only** tools run with npm scripts,
   and live in `tools/`.
 - Hosted on GitHub Pages (`.github/workflows/deploy.yml`). `vite.config.js`
@@ -78,11 +80,12 @@ src/
                      tileset, tilemap, camera, sprite, fade,
                      font-glyphs (the pixel font as data), text, panel,
                      talk-parser, talk-checker, talk-runner, story-state,
-                     dialog-box
+                     dialog-box, pokey, song, music-player, sound
   game/              Gravehound itself: world, character, hero, npc, ash, tiles,
                      sprites, map-banner, pause-menu, cast, portraits, backgrounds, story-flags,
-                     talk-actions
+                     talk-actions, sound-effects
     talk/            .talk dialog files; register new ones in talk/index.js
+    music/           one file per song; register new ones in music/index.js
     maps/            one file per map; register new ones in maps/index.js.
                      check-maps tests the names they use when the game loads
 tools/               desktop-only editors and the art import pipeline (planned)

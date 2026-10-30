@@ -1,7 +1,7 @@
 /**
  * The menu the Menu button opens. Play stops while it's up, and the game stays
  * dimly visible behind it. It has a short list of choices, leading to the
- * hero's items and stats.
+ * hero's items and stats, and can turn the sound off.
  */
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from '../engine/config.js'
 import { moveCursor } from '../engine/input.js'
@@ -29,7 +29,7 @@ const TEXT_LEFT = PANEL_MARGIN + PANEL_TEXT_INSET
 const TEXT_TOP = PANEL_MARGIN + PANEL_TEXT_INSET
 
 /** Width of the panel holding the main choices. */
-const MAIN_PANEL_WIDTH = 56
+const MAIN_PANEL_WIDTH = 72
 
 /** Item names shown at once. A longer list scrolls to follow the cursor. */
 const ITEM_ROWS = 6
@@ -42,18 +42,14 @@ const STAT_VALUE_OFFSET = 48
 
 /** @typedef {'main' | 'items' | 'status'} MenuPage */
 
-/** @typedef {{label: string, page: MenuPage | null}} MainChoice  A null page closes the menu. */
-
-/** @type {MainChoice[]} */
-const MAIN_CHOICES = [
-  { label: 'Items', page: 'items' },
-  { label: 'Status', page: 'status' },
-  { label: 'Close', page: null },
-]
+/** The main page's choices, in order. */
+const MAIN_CHOICES = ['Items', 'Status', 'Sound', 'Close']
 
 /** Open it with `open()`. While `active`, it gets all the input. */
 export class PauseMenu {
-  constructor() {
+  /** @param {import('../engine/sound.js').Sound} sound */
+  constructor(sound) {
+    this.sound = sound
     this.active = false
     /**
      * Handed over on every open, so the menu can never show a story that
@@ -98,7 +94,7 @@ export class PauseMenu {
   /** @param {import('../engine/input.js').Input} input */
   update(input) {
     if (input.wasPressed('menu')) {
-      this.close()
+      this.#leave()
     } else if (this.page === 'main') {
       this.#updateMain(input)
     } else {
@@ -106,15 +102,35 @@ export class PauseMenu {
     }
   }
 
+  /** Close the menu the way the player does, with a sound. */
+  #leave() {
+    this.sound.play('back')
+    this.close()
+  }
+
   /** @param {import('../engine/input.js').Input} input */
   #updateMain(input) {
-    this.mainCursor = moveCursor(input, this.mainCursor, MAIN_CHOICES.length)
+    const cursor = moveCursor(input, this.mainCursor, MAIN_CHOICES.length)
+    if (cursor !== this.mainCursor) this.sound.play('cursor')
+    this.mainCursor = cursor
+
     if (input.wasPressed('b')) {
-      this.close()
+      this.#leave()
     } else if (input.wasPressed('a')) {
-      const { page } = MAIN_CHOICES[this.mainCursor]
-      if (page) this.#showPage(page)
-      else this.close()
+      this.#choose(MAIN_CHOICES[this.mainCursor])
+    }
+  }
+
+  /** @param {string} choice  One of MAIN_CHOICES. */
+  #choose(choice) {
+    if (choice === 'Close') {
+      this.#leave()
+    } else if (choice === 'Sound') {
+      this.sound.setMuted(!this.sound.muted)
+      this.sound.play('confirm')
+    } else {
+      this.sound.play('confirm')
+      this.#showPage(choice === 'Items' ? 'items' : 'status')
     }
   }
 
@@ -132,9 +148,14 @@ export class PauseMenu {
     if (this.page === 'items') {
       // The list may have shrunk since the cursor last moved.
       const count = this.#items.length
-      this.itemCursor = moveCursor(input, Math.min(this.itemCursor, count - 1), count)
+      const cursor = moveCursor(input, Math.min(this.itemCursor, count - 1), count)
+      if (cursor !== this.itemCursor) this.sound.play('cursor')
+      this.itemCursor = cursor
     }
-    if (input.wasPressed('a') || input.wasPressed('b')) this.page = 'main'
+    if (input.wasPressed('a') || input.wasPressed('b')) {
+      this.sound.play('back')
+      this.page = 'main'
+    }
   }
 
   /** @param {CanvasRenderingContext2D} ctx */
@@ -151,7 +172,8 @@ export class PauseMenu {
 
   /** @param {CanvasRenderingContext2D} ctx */
   #drawMain(ctx) {
-    const labels = MAIN_CHOICES.map((choice) => choice.label)
+    const soundLabel = this.sound.muted ? 'Sound off' : 'Sound on'
+    const labels = MAIN_CHOICES.map((choice) => (choice === 'Sound' ? soundLabel : choice))
     drawPanel(ctx, PANEL_MARGIN, PANEL_MARGIN, MAIN_PANEL_WIDTH, panelHeight(labels.length))
     drawChoices(ctx, labels, this.mainCursor, TEXT_LEFT, TEXT_TOP)
   }

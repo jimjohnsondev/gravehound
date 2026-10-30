@@ -38,8 +38,9 @@ export class World {
    * @param {import('../engine/talk-parser.js').Scenes} options.scenes  All dialog.
    * @param {Record<string, import('../engine/dialog-box.js').Speaker>} options.speakers
    * @param {Record<string, CanvasImageSource>} options.backgrounds  Dialog backgrounds.
+   * @param {import('../engine/sound.js').Sound} options.sound
    */
-  constructor({ maps, tileset, heroSprites, ashSprites, npcSprites, scenes, speakers, backgrounds }) {
+  constructor({ maps, tileset, heroSprites, ashSprites, npcSprites, scenes, speakers, backgrounds, sound }) {
     this.maps = maps
     this.tileset = tileset
     this.npcSprites = npcSprites
@@ -49,9 +50,10 @@ export class World {
     this.camera = new Camera()
     this.fade = new Fade()
     this.banner = new MapBanner()
-    this.dialog = new DialogBox({ speakers, backgrounds })
+    this.sound = sound
+    this.dialog = new DialogBox({ speakers, backgrounds, playSound: (name) => sound.play(name) })
     this.story = new StoryState(STATS)
-    this.menu = new PauseMenu()
+    this.menu = new PauseMenu(sound)
     this.heroName = PLACEHOLDER_HERO_NAME
 
     /** @type {MapDefinition | null} */
@@ -95,6 +97,7 @@ export class World {
     }, this.hero.center)
     this.camera.follow(definition.mode, this.tileMap, this.hero.center)
     this.banner.show(definition.name)
+    this.sound.playSong(definition.music)
     this.#startStoryScene(cameFrom)
   }
 
@@ -124,6 +127,7 @@ export class World {
 
   /** @param {import('../engine/input.js').Input} input */
   update(input) {
+    this.sound.update()
     this.fade.update()
     if (this.fade.busy) return
 
@@ -138,6 +142,7 @@ export class World {
       return
     }
     if (input.wasPressed('menu')) {
+      this.sound.play('confirm')
       this.menu.open(this.story, this.heroName)
       return
     }
@@ -203,6 +208,7 @@ export class World {
     if (this.story.isSet(chest.openedFlag)) return
     this.story.set(chest.openedFlag)
     this.tileMap.setTile(chest.tileX, chest.tileY, OPEN_CHEST_TILE)
+    this.sound.play('chest')
     this.talk(chest.scene)
   }
 
@@ -210,6 +216,7 @@ export class World {
   #checkExits() {
     const exit = findAtPoint(this.mapDefinition.exits, this.hero.center)
     if (!exit) return
+    this.sound.play('door')
     this.fade.out(() => this.enterMap(exit.toMap, exit.arriveX, exit.arriveY, exit.facing))
   }
 
