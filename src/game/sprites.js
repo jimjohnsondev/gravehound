@@ -49,6 +49,46 @@ export function createHeroSprites() {
   })
 }
 
+/**
+ * Every NPC's sprites, by the name map files use. Add new characters here.
+ * @returns {Record<string, import('../engine/sprite.js').SpriteSheet>}
+ */
+export function createNpcSprites() {
+  return { wren: createWrenSprites() }
+}
+
+/** Grandmother Wren: 12x16, 2 frames (standing, stepping). */
+function createWrenSprites() {
+  return paintSpriteSheet({
+    frameWidth: 12,
+    frameHeight: 16,
+    frameCount: 2,
+    paint(draw, facing, frame) {
+      const stepping = frame === 1
+
+      // Grey hair in a bun, with her face showing unless she's turned away.
+      draw.rect(4, 0, 4, 2, C.greyHair)
+      draw.rect(3, 2, 6, 5, C.greyHair)
+      if (facing === 'down') {
+        draw.rect(4, 3, 4, 4, C.skin)
+        draw.rect(4, 4, 1, 1, C.outline)
+        draw.rect(7, 4, 1, 1, C.outline)
+      } else if (facing !== 'up') {
+        const faceLeft = facing === 'left' ? 3 : 5
+        draw.rect(faceLeft, 3, 4, 4, C.skin)
+        draw.rect(facing === 'left' ? 4 : 7, 4, 1, 1, C.outline)
+      }
+
+      // A long shawl and skirt down to her boots.
+      draw.rect(2, 7, 8, 7, C.shawl)
+      draw.rect(1, 8, 1, 3, C.skin)
+      draw.rect(10, 8, 1, 3, C.skin)
+      draw.rect(3, stepping ? 13 : 14, 2, 2, C.boots)
+      draw.rect(7, 14, 2, 2, C.boots)
+    },
+  })
+}
+
 /** Ash, the black dog: 16x16, 2 frames. Pale edges keep him visible at night. */
 export function createAshSprites() {
   return paintSpriteSheet({

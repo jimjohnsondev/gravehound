@@ -9,10 +9,12 @@ import { CAST } from '../cast.js'
 import { COUNTERS, FLAGS, ITEMS, STATS } from '../story-flags.js'
 import { TALK_ACTIONS } from '../talk-actions.js'
 import cottage from './cottage.talk?raw'
+import woodEdge from './wood-edge.talk?raw'
 
 /** Every .talk file in the game, by file name. Add new ones here. */
 const TALK_FILES = {
   'cottage.talk': cottage,
+  'wood-edge.talk': woodEdge,
 }
 
 /**

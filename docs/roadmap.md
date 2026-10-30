@@ -26,8 +26,8 @@ Still to do for milestone 1:
       `index.html`, the cottage map (a single screen must be 10 x 9), the
       hard-coded sizes in `game/backgrounds.js`, and re-fit the dialog box,
       portraits and map banner to the smaller screen
-- [ ] Interact with A: talk to NPCs, read signs, open chests
-- [ ] NPCs that stand still or wander
+- [x] Interact with A: talk to NPCs, read signs, open chests
+- [ ] NPCs that wander (standing still already works)
 - [ ] Menu screen (replacing the current pause)
 - [ ] Sound: a POKEY-style synth on Web Audio, sound effects, and a music player
 - [ ] Save and load in localStorage

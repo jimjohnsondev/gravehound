@@ -14,6 +14,7 @@ export const FLAGS = {
   pressed_wren: 'At supper, pressed Grandmother about why she is frightened (needs Heart 2).',
   supper_done: 'The birthday supper has played.',
   ledger_read: "Read Halloway's ledger at the Drowned Chapel (the midpoint). Set by the game.",
+  opened_wood_chest: "Opened the chest at the wood's edge. Set by the game.",
 }
 
 /** Numbers that dialog can change. Unset counters are 0. */
@@ -31,4 +32,5 @@ export const STATS = {
 /** Things [give ...] can hand to the hero. */
 export const ITEMS = {
   fathers_knife: 'Given by Grandmother at supper. Unlocks the one-button attack.',
+  tinderbox: "PLACEHOLDER: in the chest at the wood's edge.",
 }

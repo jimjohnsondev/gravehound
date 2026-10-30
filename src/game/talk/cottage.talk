@@ -50,8 +50,14 @@ WREN (happy): There. Snug as a hearth-cat. Happy birthday, {hero}.
 [set supper_done]
 
 
+# Talking to Wren in the cottage, outside the supper.
+== wren_chat ==
+[if not supper_done] WREN (happy): Kindling before supper, love. Stay in sight of the path.
+[if not supper_done] WREN: And take Ash. He knows those trees better than you do.
+[if supper_done] WREN (happy): Off to bed with you, birthday boy.
+
+
 # Looking at the wedding portrait on the cottage wall. It's an object, so it's all narration.
-# Nothing triggers this yet; interacting with A comes next on the roadmap.
 == wedding_portrait ==
 Your mother and father on their wedding day, stiff in their best clothes.
 A black dog sits at their feet.

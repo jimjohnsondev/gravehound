@@ -22,7 +22,8 @@ const EDGE_NUDGE = 0.001
 export class TileMap {
   /** @param {string[]} rows  One string per row, all the same length. */
   constructor(rows) {
-    this.rows = rows
+    // A copy, so changing a tile here leaves the map's definition as written.
+    this.rows = [...rows]
     this.widthInTiles = rows[0].length
     this.heightInTiles = rows.length
     this.widthInPixels = this.widthInTiles * TILE_SIZE
@@ -44,6 +45,17 @@ export class TileMap {
     if (tileY < 0 || tileY >= this.heightInTiles) return null
     if (tileX < 0 || tileX >= this.widthInTiles) return null
     return this.rows[tileY][tileX]
+  }
+
+  /**
+   * Change one tile, e.g. when a chest opens.
+   * @param {number} tileX
+   * @param {number} tileY
+   * @param {string} character  The new tile's character.
+   */
+  setTile(tileX, tileY, character) {
+    const row = this.rows[tileY]
+    this.rows[tileY] = row.slice(0, tileX) + character + row.slice(tileX + 1)
   }
 
   /**

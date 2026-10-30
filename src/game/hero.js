@@ -6,6 +6,13 @@
  * trees above, which is what makes a 3/4 top-down view look right.
  */
 import { TILE_SIZE } from '../engine/config.js'
+import { FACING_STEPS } from '../engine/sprite.js'
+
+/**
+ * How far ahead of the feet's centre the hero can reach with A. Half a tile
+ * lands inside whatever the feet are pressed up against, in every direction.
+ */
+const REACH = TILE_SIZE / 2
 
 /** Pixels moved per update step (60 steps a second). */
 const WALK_SPEED = 1.25
@@ -38,6 +45,12 @@ export class Hero {
   /** Centre of the feet, in map pixels. Used for exits and the camera. */
   get center() {
     return { x: this.x + this.width / 2, y: this.y + this.height / 2 }
+  }
+
+  /** The spot in front of the hero that A acts on, in map pixels. */
+  get reachPoint() {
+    const step = FACING_STEPS[this.facing]
+    return { x: this.center.x + step.x * REACH, y: this.center.y + step.y * REACH }
   }
 
   /** Where the hero's feet touch the ground. Lower on screen means nearer. */

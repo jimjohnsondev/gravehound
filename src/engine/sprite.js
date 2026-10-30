@@ -11,6 +11,17 @@
 /** Row order in a character sprite sheet. @type {Facing[]} */
 export const FACINGS = ['down', 'up', 'left', 'right']
 
+/**
+ * One step in each facing, as x and y.
+ * @type {Record<Facing, {x: number, y: number}>}
+ */
+export const FACING_STEPS = {
+  down: { x: 0, y: 1 },
+  up: { x: 0, y: -1 },
+  left: { x: -1, y: 0 },
+  right: { x: 1, y: 0 },
+}
+
 /** One image holding all of a character's frames. */
 export class SpriteSheet {
   /**

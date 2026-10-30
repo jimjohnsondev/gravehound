@@ -4,6 +4,7 @@
  *
  * Tile key: see game/tiles.js
  *   W timber wall   _ floorboards   H hearth   t table   r rug   D doorway
+ *   P wedding portrait
  */
 
 /** @type {import('../world.js').MapDefinition} */
@@ -14,7 +15,7 @@ export const cottage = {
   lightLevel: 0,
   rows: [
     'WWWWWWWWWW',
-    'WWWWHWWWWW',
+    'WWPWHWWWWW',
     'W________W',
     'W_t______W',
     'W________W',
@@ -27,4 +28,11 @@ export const cottage = {
     // The front door leads out to the edge of the wood.
     { tileX: 4, tileY: 8, toMap: 'woodEdge', arriveX: 9, arriveY: 7, facing: 'down' },
   ],
+  npcs: [
+    { sprite: 'wren', tileX: 6, tileY: 3, facing: 'down', scene: 'wren_chat' },
+  ],
+  spots: [
+    { tileX: 2, tileY: 1, scene: 'wedding_portrait' },
+  ],
+  chests: [],
 }

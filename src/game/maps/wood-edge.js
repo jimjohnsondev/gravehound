@@ -4,6 +4,7 @@
  *
  * Tile key: see game/tiles.js
  *   . grass   , long grass   = path   T tree   ~ water   # stone wall   D doorway
+ *   s signpost   C chest
  */
 
 /** @type {import('../world.js').MapDefinition} */
@@ -16,11 +17,11 @@ export const woodEdge = {
     'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT',
     'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT',
     'TT....#######.....,,,,,.....TTTTTTTTTTTT',
-    'TT....#######....,,,,,,,.....TTTTTTTTTTT',
+    'TT..C.#######....,,,,,,,.....TTTTTTTTTTT',
     'TT....#######.........,,......TTTTTTTTTT',
     'TT....#######...................TTTTTTTT',
     'TT....###D###....................TTTTTTT',
-    'TT.......=........................TTTTTT',
+    'TT.......=s.......................TTTTTT',
     'TT.......=..........,,,...........TTTTTT',
     'TT.......=.........,,,,,...........TTTTT',
     'TT.......==========......T..........TTTT',
@@ -41,5 +42,12 @@ export const woodEdge = {
   exits: [
     // Back into the cottage.
     { tileX: 9, tileY: 6, toMap: 'cottage', arriveX: 4, arriveY: 7, facing: 'up' },
+  ],
+  npcs: [],
+  spots: [
+    { tileX: 10, tileY: 7, scene: 'wood_sign' },
+  ],
+  chests: [
+    { tileX: 4, tileY: 3, scene: 'wood_chest', openedFlag: 'opened_wood_chest' },
   ],
 }

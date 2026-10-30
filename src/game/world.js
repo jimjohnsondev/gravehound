@@ -7,14 +7,17 @@ import { Camera } from '../engine/camera.js'
 import { DialogBox } from '../engine/dialog-box.js'
 import { Fade } from '../engine/fade.js'
 import { MAX_LIGHT_LEVEL, UI_COLORS } from '../engine/palette.js'
+import { FACING_STEPS } from '../engine/sprite.js'
 import { StoryState } from '../engine/story-state.js'
 import { Conversation } from '../engine/talk-runner.js'
 import { TileMap } from '../engine/tilemap.js'
 import { Ash } from './ash.js'
 import { Hero } from './hero.js'
 import { MapBanner } from './map-banner.js'
+import { Npc } from './npc.js'
 import { STATS } from './story-flags.js'
 import { TALK_ACTIONS } from './talk-actions.js'
+import { OPEN_CHEST_TILE } from './tiles.js'
 
 /** PLACEHOLDER until there's a title screen where the player names the hero. */
 const PLACEHOLDER_HERO_NAME = 'Rowan'
@@ -34,6 +37,23 @@ const PAUSE_OVERLAY = 'rgba(0, 0, 0, 0.5)'
  */
 
 /**
+ * @typedef {object} MapSpot
+ * A tile that plays a scene when you press A at it: a sign, a picture, a well.
+ * @property {number} tileX
+ * @property {number} tileY
+ * @property {string} scene
+ */
+
+/**
+ * @typedef {object} MapChest
+ * A chest tile. It opens once and stays open, remembered by a story flag.
+ * @property {number} tileX
+ * @property {number} tileY
+ * @property {string} scene       Plays on opening, and hands over what's inside.
+ * @property {string} openedFlag  Set when opened (declared in game/story-flags.js).
+ */
+
+/**
  * @typedef {object} MapDefinition
  * @property {string} id
  * @property {string} name
@@ -41,15 +61,10 @@ const PAUSE_OVERLAY = 'rgba(0, 0, 0, 0.5)'
  * @property {number} lightLevel         0 (bright) to 4 (dark). Darkens scenery only.
  * @property {string[]} rows             The tiles, one string per row.
  * @property {MapExit[]} exits
+ * @property {import('./npc.js').NpcDefinition[]} npcs
+ * @property {MapSpot[]} spots
+ * @property {MapChest[]} chests
  */
-
-/** Which way is "behind" for each facing, used to place Ash on arrival. */
-const BEHIND = {
-  down: { x: 0, y: -1 },
-  up: { x: 0, y: 1 },
-  left: { x: 1, y: 0 },
-  right: { x: -1, y: 0 },
-}
 
 /** Everything in play. Call `enterMap` once before the first update or draw. */
 export class World {
@@ -59,13 +74,15 @@ export class World {
    * @param {import('../engine/tileset.js').TileSet} options.tileset
    * @param {import('../engine/sprite.js').SpriteSheet} options.heroSprites
    * @param {import('../engine/sprite.js').SpriteSheet} options.ashSprites
+   * @param {Record<string, import('../engine/sprite.js').SpriteSheet>} options.npcSprites
    * @param {import('../engine/talk-parser.js').Scenes} options.scenes  All dialog.
    * @param {Record<string, import('../engine/dialog-box.js').Speaker>} options.speakers
    * @param {Record<string, CanvasImageSource>} options.backgrounds  Dialog backgrounds.
    */
-  constructor({ maps, tileset, heroSprites, ashSprites, scenes, speakers, backgrounds }) {
+  constructor({ maps, tileset, heroSprites, ashSprites, npcSprites, scenes, speakers, backgrounds }) {
     this.maps = maps
     this.tileset = tileset
+    this.npcSprites = npcSprites
     this.scenes = scenes
     this.hero = new Hero(heroSprites)
     this.ash = new Ash(ashSprites)
@@ -80,6 +97,8 @@ export class World {
     this.mapDefinition = null
     /** @type {TileMap | null} */
     this.tileMap = null
+    /** @type {Npc[]} */
+    this.npcs = []
     this.lightLevel = 0
     this.paused = false
   }
@@ -99,13 +118,20 @@ export class World {
     this.mapDefinition = definition
     this.tileMap = new TileMap(definition.rows)
     this.lightLevel = definition.lightLevel
+    this.npcs = definition.npcs.map((npc) => new Npc(npc, this.npcSprites[npc.sprite]))
+    for (const chest of definition.chests) {
+      if (this.story.isSet(chest.openedFlag)) {
+        this.tileMap.setTile(chest.tileX, chest.tileY, OPEN_CHEST_TILE)
+      }
+    }
 
     this.hero.placeOnTile(tileX, tileY)
     this.hero.facing = facing
-    const behind = BEHIND[facing]
+    // Ash starts one tile behind the hero.
+    const ahead = FACING_STEPS[facing]
     this.ash.placeAt({
-      x: this.hero.center.x + behind.x * TILE_SIZE,
-      y: this.hero.center.y + behind.y * TILE_SIZE,
+      x: this.hero.center.x - ahead.x * TILE_SIZE,
+      y: this.hero.center.y - ahead.y * TILE_SIZE,
     }, this.hero.center)
     this.camera.follow(definition.mode, this.tileMap, this.hero.center)
     this.banner.show(definition.name)
@@ -159,10 +185,58 @@ export class World {
       this.lightLevel = (this.lightLevel + 1) % (MAX_LIGHT_LEVEL + 1)
     }
 
-    this.hero.update(input.direction(), (box) => this.tileMap.overlapsSolid(this.tileset, box))
+    if (input.wasPressed('a')) this.#interact()
+    if (this.dialog.active) return
+
+    this.hero.update(input.direction(), (box) => this.#isBlocked(box))
     this.ash.update(this.hero)
     this.camera.follow(this.mapDefinition.mode, this.tileMap, this.hero.center)
     this.#checkExits()
+  }
+
+  /**
+   * Is a box (in map pixels) walking into something?
+   * @param {{x: number, y: number, width: number, height: number}} box
+   */
+  #isBlocked(box) {
+    return this.tileMap.overlapsSolid(this.tileset, box) || this.npcs.some((npc) => npc.overlaps(box))
+  }
+
+  /** A was pressed: act on whatever is right in front of the hero. */
+  #interact() {
+    const reach = this.hero.reachPoint
+
+    const npc = this.npcs.find((candidate) => candidate.isWithinReach(reach))
+    if (npc) {
+      npc.turnToFace(this.hero.facing)
+      this.talk(npc.scene)
+      return
+    }
+
+    const tileX = Math.floor(reach.x / TILE_SIZE)
+    const tileY = Math.floor(reach.y / TILE_SIZE)
+    const isThere = (/** @type {{tileX: number, tileY: number}} */ thing) =>
+      thing.tileX === tileX && thing.tileY === tileY
+
+    const chest = this.mapDefinition.chests.find(isThere)
+    if (chest) {
+      this.#openChest(chest)
+      return
+    }
+
+    const spot = this.mapDefinition.spots.find(isThere)
+    if (spot) this.talk(spot.scene)
+  }
+
+  /**
+   * Open a chest, unless it's already been opened.
+   * @param {MapChest} chest
+   */
+  #openChest(chest) {
+    if (this.story.isSet(chest.openedFlag)) return
+    this.story.set(chest.openedFlag)
+    this.tileMap.setTile(chest.tileX, chest.tileY, OPEN_CHEST_TILE)
+    this.talk(chest.scene)
   }
 
   /** If the hero's feet are on an exit tile, fade out and change map. */
@@ -182,7 +256,7 @@ export class World {
     this.tileMap.draw(ctx, this.tileset, this.camera, this.lightLevel)
 
     // Draw from back to front so nearer characters overlap farther ones.
-    const characters = [this.ash, this.hero].sort((a, b) => a.depth - b.depth)
+    const characters = [this.ash, this.hero, ...this.npcs].sort((a, b) => a.depth - b.depth)
     for (const character of characters) character.draw(ctx, this.camera)
 
     this.banner.draw(ctx)

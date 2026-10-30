@@ -19,6 +19,21 @@ function speckle(p, ramp, step) {
   p.pixel(Math.floor(p.random() * 16), Math.floor(p.random() * 16), ramp, step)
 }
 
+/**
+ * Paint timber planks over a whole tile.
+ * @param {import('../engine/tileset.js').TilePainter} p
+ */
+function paintTimber(p) {
+  p.rect(0, 0, 16, 16, 'wood', 2)
+  for (let y = 0; y < 16; y += 4) {
+    p.rect(0, y, 16, 3, 'wood', 1)
+    p.rect(0, y, 16, 1, 'wood', 0)
+  }
+}
+
+/** The tile a closed chest ('C') turns into when opened. */
+export const OPEN_CHEST_TILE = 'c'
+
 /** @type {Record<string, import('../engine/tileset.js').TileType>} */
 export const TILE_TYPES = {
   '.': {
@@ -83,6 +98,42 @@ export const TILE_TYPES = {
     },
   },
 
+  s: {
+    name: 'signpost',
+    solid: true,
+    paint(p) {
+      p.rect(0, 0, 16, 16, 'grass', 1)
+      p.rect(7, 8, 2, 8, 'wood', 2) // post
+      p.rect(1, 2, 14, 7, 'wood', 1) // board
+      p.rect(1, 2, 14, 1, 'wood', 0)
+      p.rect(3, 4, 10, 1, 'wood', 3) // faded writing
+      p.rect(3, 6, 7, 1, 'wood', 3)
+    },
+  },
+
+  C: {
+    name: 'closed chest',
+    solid: true,
+    paint(p) {
+      p.rect(0, 0, 16, 16, 'grass', 1)
+      p.rect(2, 4, 12, 10, 'wood', 1)
+      p.rect(2, 4, 12, 4, 'wood', 0) // lid
+      p.rect(2, 8, 12, 1, 'wood', 3)
+      p.rect(7, 7, 2, 3, 'ember', 0) // clasp
+    },
+  },
+
+  c: {
+    name: 'open chest',
+    solid: true,
+    paint(p) {
+      p.rect(0, 0, 16, 16, 'grass', 1)
+      p.rect(2, 2, 12, 4, 'wood', 0) // lid, tipped back
+      p.rect(2, 6, 12, 8, 'wood', 1)
+      p.rect(3, 6, 10, 4, 'wood', 4) // the empty inside
+    },
+  },
+
   S: {
     name: 'standing stone',
     solid: true,
@@ -113,12 +164,19 @@ export const TILE_TYPES = {
   W: {
     name: 'timber wall',
     solid: true,
+    paint: paintTimber,
+  },
+
+  P: {
+    name: 'wedding portrait',
+    solid: true,
     paint(p) {
-      p.rect(0, 0, 16, 16, 'wood', 2)
-      for (let y = 0; y < 16; y += 4) {
-        p.rect(0, y, 16, 3, 'wood', 1)
-        p.rect(0, y, 16, 1, 'wood', 0)
-      }
+      paintTimber(p)
+      p.rect(2, 2, 12, 11, 'wood', 3) // frame
+      p.rect(3, 3, 10, 9, 'earth', 0) // canvas
+      p.rect(5, 5, 2, 6, 'cloth', 1) // the bride and groom
+      p.rect(9, 5, 2, 6, 'stone', 2)
+      p.rect(7, 9, 2, 2, 'stone', 4) // the dog at their feet
     },
   },
 

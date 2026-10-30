@@ -9,10 +9,11 @@ import { Input } from './engine/input.js'
 import { startLoop } from './engine/loop.js'
 import { Screen } from './engine/screen.js'
 import { TileSet } from './engine/tileset.js'
+import { checkMaps } from './game/maps/check-maps.js'
 import { MAPS } from './game/maps/index.js'
 import { createBackgrounds } from './game/backgrounds.js'
 import { createSpeakers } from './game/cast.js'
-import { createAshSprites, createHeroSprites } from './game/sprites.js'
+import { createAshSprites, createHeroSprites, createNpcSprites } from './game/sprites.js'
 import { loadScenes } from './game/talk/index.js'
 import { TILE_TYPES } from './game/tiles.js'
 import { World } from './game/world.js'
@@ -30,12 +31,17 @@ const screen = new Screen(
 const input = new Input()
 input.attachTouchControls(/** @type {HTMLElement} */ (document.getElementById('touch-controls')))
 
+const scenes = loadScenes()
+const npcSprites = createNpcSprites()
+checkMaps(MAPS, scenes, npcSprites)
+
 const world = new World({
   maps: MAPS,
   tileset: new TileSet(TILE_TYPES),
   heroSprites: createHeroSprites(),
   ashSprites: createAshSprites(),
-  scenes: loadScenes(),
+  npcSprites,
+  scenes,
   speakers: createSpeakers(),
   backgrounds: createBackgrounds(),
 })

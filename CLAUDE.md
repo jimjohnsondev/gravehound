@@ -79,11 +79,12 @@ src/
                      font-glyphs (the pixel font as data), text, panel,
                      talk-parser, talk-checker, talk-runner, story-state,
                      dialog-box
-  game/              Gravehound itself: world, hero, ash, tiles, sprites,
+  game/              Gravehound itself: world, hero, ash, npc, tiles, sprites,
                      map-banner, cast, portraits, backgrounds, story-flags,
                      talk-actions
     talk/            .talk dialog files; register new ones in talk/index.js
-    maps/            one file per map; register new ones in maps/index.js
+    maps/            one file per map; register new ones in maps/index.js.
+                     check-maps tests the names they use when the game loads
 tools/               desktop-only editors and the art import pipeline (planned)
 docs/                story, decisions, roadmap
 ```
