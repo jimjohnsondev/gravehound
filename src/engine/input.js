@@ -98,23 +98,30 @@ export class Input {
     this.#attachDpad(dpad)
 
     for (const element of root.querySelectorAll('[data-button]')) {
-      const buttonElement = /** @type {HTMLElement} */ (element)
-      const button = /** @type {Button} */ (buttonElement.dataset.button)
-      const press = (/** @type {PointerEvent} */ event) => {
-        event.preventDefault()
-        buttonElement.setPointerCapture(event.pointerId)
-        this.touch.add(button)
-        this.wentDown.add(button)
-        buttonElement.classList.add('pressed')
-      }
-      const release = () => {
-        this.touch.delete(button)
-        buttonElement.classList.remove('pressed')
-      }
-      buttonElement.addEventListener('pointerdown', press)
-      buttonElement.addEventListener('pointerup', release)
-      buttonElement.addEventListener('pointercancel', release)
+      this.#attachButton(/** @type {HTMLElement} */ (element))
     }
+  }
+
+  /**
+   * Hook up one on-screen button.
+   * @param {HTMLElement} buttonElement
+   */
+  #attachButton(buttonElement) {
+    const button = /** @type {Button} */ (buttonElement.dataset.button)
+    const press = (/** @type {PointerEvent} */ event) => {
+      event.preventDefault()
+      buttonElement.setPointerCapture(event.pointerId)
+      this.touch.add(button)
+      this.wentDown.add(button)
+      buttonElement.classList.add('pressed')
+    }
+    const release = () => {
+      this.touch.delete(button)
+      buttonElement.classList.remove('pressed')
+    }
+    buttonElement.addEventListener('pointerdown', press)
+    buttonElement.addEventListener('pointerup', release)
+    buttonElement.addEventListener('pointercancel', release)
   }
 
   /**
@@ -140,9 +147,11 @@ export class Input {
       clear()
       if (Math.hypot(x, y) < DPAD_DEAD_ZONE) return
 
-      // Angle in 45-degree slices: 0 = right, 2 = down, 4 = left, 6 = up.
-      const slice = Math.round(Math.atan2(y, x) / (Math.PI / 4)) & 7
-      const pressed = DPAD_SLICES[slice]
+      // Angle in 45-degree slices, from -4 to 4. Adding a full turn before
+      // wrapping gives 0 = right, 2 = down, 4 = left, 6 = up.
+      const sliceCount = DPAD_SLICES.length
+      const slice = Math.round(Math.atan2(y, x) / (Math.PI / 4))
+      const pressed = DPAD_SLICES[(slice + sliceCount) % sliceCount]
       for (const button of pressed) {
         this.touch.add(button)
         this.wentDown.add(button)
@@ -165,7 +174,7 @@ export class Input {
   /** Read the first connected gamepad, if any. */
   #readGamepad() {
     const held = new Set()
-    const pad = navigator.getGamepads?.().find((p) => p)
+    const pad = navigator.getGamepads?.().find((gamepad) => gamepad !== null)
     if (!pad) return held
 
     for (const [index, button] of Object.entries(GAMEPAD_BINDINGS)) {

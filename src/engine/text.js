@@ -44,7 +44,8 @@ export function wrapText(text, maxWidth) {
   /** @type {string[]} */
   const lines = []
   let line = ''
-  for (const word of text.split(/\s+/).filter(Boolean)) {
+  const words = text.split(/\s+/).filter((piece) => piece !== '')
+  for (const word of words) {
     const longer = line ? `${line} ${word}` : word
     if (line && measureText(longer) > maxWidth) {
       lines.push(line)

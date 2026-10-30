@@ -24,8 +24,7 @@ export class Screen {
     this.ctx = /** @type {CanvasRenderingContext2D} */ (canvas.getContext('2d'))
     this.ctx.imageSmoothingEnabled = false
 
-    this.resize = this.resize.bind(this)
-    new ResizeObserver(this.resize).observe(area)
+    new ResizeObserver(() => this.resize()).observe(area)
     this.resize()
   }
 

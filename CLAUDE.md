@@ -79,8 +79,8 @@ src/
                      font-glyphs (the pixel font as data), text, panel,
                      talk-parser, talk-checker, talk-runner, story-state,
                      dialog-box
-  game/              Gravehound itself: world, hero, ash, npc, tiles, sprites,
-                     map-banner, cast, portraits, backgrounds, story-flags,
+  game/              Gravehound itself: world, character, hero, npc, ash, tiles,
+                     sprites, map-banner, cast, portraits, backgrounds, story-flags,
                      talk-actions
     talk/            .talk dialog files; register new ones in talk/index.js
     maps/            one file per map; register new ones in maps/index.js.

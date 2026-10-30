@@ -7,7 +7,7 @@
  *   P wedding portrait
  */
 
-/** @type {import('../world.js').MapDefinition} */
+/** @type {import('./index.js').MapDefinition} */
 export const cottage = {
   id: 'cottage',
   name: "Wren's cottage",

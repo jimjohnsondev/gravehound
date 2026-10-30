@@ -7,7 +7,7 @@
  *   s signpost   C chest
  */
 
-/** @type {import('../world.js').MapDefinition} */
+/** @type {import('./index.js').MapDefinition} */
 export const woodEdge = {
   id: 'woodEdge',
   name: "The wood's edge",

@@ -183,28 +183,35 @@ function parseLine(line, place, reader) {
   if (header) {
     const name = header[1]
     if (reader.scenes[name]) throw new Error(`there is already a scene called ${name}`)
-    reader.steps = reader.scenes[name] = []
+    reader.steps = []
+    reader.scenes[name] = reader.steps
     reader.openMenu = null
     return
   }
   if (!reader.steps) throw new Error('this line is outside a scene; start one with == name ==')
 
-  let rest = line
-  /** @type {Condition} */
-  let condition = []
-  const conditionMatch = rest.match(LEADING_CONDITION)
-  if (conditionMatch) {
-    condition = parseCondition(conditionMatch[1].trim())
-    rest = rest.slice(conditionMatch[0].length)
-    if (rest === '') throw new Error('[if ...] needs something after it on the same line')
-  }
-
+  const { condition, rest } = splitLeadingCondition(line)
   if (rest.startsWith('*')) {
     addChoice(parseChoice(rest.slice(1).trim(), condition, place), place, reader)
   } else {
     reader.openMenu = null
     reader.steps.push(parseStep(rest, condition, place))
   }
+}
+
+/**
+ * Separate a line's [if ...], if it has one, from the rest of the line.
+ * @param {string} line
+ * @returns {{condition: Condition, rest: string}}
+ */
+function splitLeadingCondition(line) {
+  const match = line.match(LEADING_CONDITION)
+  if (!match) return { condition: [], rest: line }
+
+  const condition = parseCondition(match[1].trim())
+  const rest = line.slice(match[0].length)
+  if (rest === '') throw new Error('[if ...] needs something after it on the same line')
+  return { condition, rest }
 }
 
 /**
@@ -260,25 +267,7 @@ function parseChoice(text, condition, place) {
  * @returns {Step}
  */
 function parseStep(text, condition, place) {
-  if (text.startsWith('[')) {
-    const command = text.match(COMMAND)
-    if (!command) throw new Error(`couldn't read "${text}"`)
-    const [, word, argument = ''] = command
-    switch (word) {
-      case 'set':
-      case 'clear':
-        return { type: 'change', change: parseChange(word, argument), condition, place }
-      case 'give':
-      case 'do':
-      case 'background':
-        if (!NAME.test(argument.trim())) throw new Error(`[${word}] needs one name, like [${word} some_name]`)
-        return { type: word, name: argument.trim(), condition, place }
-      case 'if':
-        throw new Error('[if ...] needs something after it on the same line')
-      default:
-        throw new Error(`unknown command [${word}]`)
-    }
-  }
+  if (text.startsWith('[')) return parseCommand(text, condition, place)
 
   const speech = text.match(SPEECH)
   if (speech) {
@@ -287,6 +276,33 @@ function parseStep(text, condition, place) {
     return { type: 'say', speaker, expression, text: words, condition, place }
   }
   return { type: 'say', speaker: null, expression: null, text, condition, place }
+}
+
+/**
+ * A line in square brackets, like [give fathers_knife].
+ * @param {string} text
+ * @param {Condition} condition
+ * @param {Place} place
+ * @returns {Step}
+ */
+function parseCommand(text, condition, place) {
+  const command = text.match(COMMAND)
+  if (!command) throw new Error(`couldn't read "${text}"`)
+  const [, word, argument = ''] = command
+  switch (word) {
+    case 'set':
+    case 'clear':
+      return { type: 'change', change: parseChange(word, argument), condition, place }
+    case 'give':
+    case 'do':
+    case 'background':
+      if (!NAME.test(argument.trim())) throw new Error(`[${word}] needs one name, like [${word} some_name]`)
+      return { type: word, name: argument.trim(), condition, place }
+    case 'if':
+      throw new Error('[if ...] needs something after it on the same line')
+    default:
+      throw new Error(`unknown command [${word}]`)
+  }
 }
 
 /**

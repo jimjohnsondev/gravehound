@@ -6,7 +6,7 @@ import { FLAGS } from '../story-flags.js'
 
 /**
  * Check every map. Throws one error listing every problem.
- * @param {Record<string, import('../world.js').MapDefinition>} maps
+ * @param {Record<string, import('./index.js').MapDefinition>} maps
  * @param {import('../../engine/talk-parser.js').Scenes} scenes
  * @param {Record<string, import('../../engine/sprite.js').SpriteSheet>} npcSprites
  */

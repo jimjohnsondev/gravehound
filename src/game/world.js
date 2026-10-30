@@ -2,7 +2,7 @@
  * The game world while playing: the current map, the characters in it, moving
  * between maps, and starting dialog scenes.
  */
-import { TILE_SIZE } from '../engine/config.js'
+import { SCREEN_HEIGHT, SCREEN_WIDTH, TILE_SIZE } from '../engine/config.js'
 import { Camera } from '../engine/camera.js'
 import { DialogBox } from '../engine/dialog-box.js'
 import { Fade } from '../engine/fade.js'
@@ -25,46 +25,7 @@ const PLACEHOLDER_HERO_NAME = 'Rowan'
 /** Laid over the whole screen while the game is paused. */
 const PAUSE_OVERLAY = 'rgba(0, 0, 0, 0.5)'
 
-/**
- * @typedef {object} MapExit
- * Stepping on this tile takes you to another map.
- * @property {number} tileX
- * @property {number} tileY
- * @property {string} toMap    Id of the map to go to (see game/maps/index.js).
- * @property {number} arriveX  Tile to arrive on in the new map.
- * @property {number} arriveY
- * @property {import('../engine/sprite.js').Facing} facing  Way to face on arrival.
- */
-
-/**
- * @typedef {object} MapSpot
- * A tile that plays a scene when you press A at it: a sign, a picture, a well.
- * @property {number} tileX
- * @property {number} tileY
- * @property {string} scene
- */
-
-/**
- * @typedef {object} MapChest
- * A chest tile. It opens once and stays open, remembered by a story flag.
- * @property {number} tileX
- * @property {number} tileY
- * @property {string} scene       Plays on opening, and hands over what's inside.
- * @property {string} openedFlag  Set when opened (declared in game/story-flags.js).
- */
-
-/**
- * @typedef {object} MapDefinition
- * @property {string} id
- * @property {string} name
- * @property {'screen' | 'scroll'} mode  Single still screen, or scrolling.
- * @property {number} lightLevel         0 (bright) to 4 (dark). Darkens scenery only.
- * @property {string[]} rows             The tiles, one string per row.
- * @property {MapExit[]} exits
- * @property {import('./npc.js').NpcDefinition[]} npcs
- * @property {MapSpot[]} spots
- * @property {MapChest[]} chests
- */
+/** @typedef {import('./maps/index.js').MapDefinition} MapDefinition */
 
 /** Everything in play. Call `enterMap` once before the first update or draw. */
 export class World {
@@ -213,24 +174,19 @@ export class World {
       return
     }
 
-    const tileX = Math.floor(reach.x / TILE_SIZE)
-    const tileY = Math.floor(reach.y / TILE_SIZE)
-    const isThere = (/** @type {{tileX: number, tileY: number}} */ thing) =>
-      thing.tileX === tileX && thing.tileY === tileY
-
-    const chest = this.mapDefinition.chests.find(isThere)
+    const chest = findAtPoint(this.mapDefinition.chests, reach)
     if (chest) {
       this.#openChest(chest)
       return
     }
 
-    const spot = this.mapDefinition.spots.find(isThere)
+    const spot = findAtPoint(this.mapDefinition.spots, reach)
     if (spot) this.talk(spot.scene)
   }
 
   /**
    * Open a chest, unless it's already been opened.
-   * @param {MapChest} chest
+   * @param {import('./maps/index.js').MapChest} chest
    */
   #openChest(chest) {
     if (this.story.isSet(chest.openedFlag)) return
@@ -241,9 +197,7 @@ export class World {
 
   /** If the hero's feet are on an exit tile, fade out and change map. */
   #checkExits() {
-    const tileX = Math.floor(this.hero.center.x / TILE_SIZE)
-    const tileY = Math.floor(this.hero.center.y / TILE_SIZE)
-    const exit = this.mapDefinition.exits.find((e) => e.tileX === tileX && e.tileY === tileY)
+    const exit = findAtPoint(this.mapDefinition.exits, this.hero.center)
     if (!exit) return
     this.fade.out(() => this.enterMap(exit.toMap, exit.arriveX, exit.arriveY, exit.facing))
   }
@@ -251,7 +205,7 @@ export class World {
   /** @param {CanvasRenderingContext2D} ctx */
   draw(ctx) {
     ctx.fillStyle = UI_COLORS.backdrop
-    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+    ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
 
     this.tileMap.draw(ctx, this.tileset, this.camera, this.lightLevel)
 
@@ -264,9 +218,22 @@ export class World {
 
     if (this.paused) {
       ctx.fillStyle = PAUSE_OVERLAY
-      ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+      ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
     }
 
     this.fade.draw(ctx)
   }
+}
+
+/**
+ * The thing on the tile under a point, if there is one.
+ * @template {{tileX: number, tileY: number}} Thing
+ * @param {Thing[]} things
+ * @param {{x: number, y: number}} point  In map pixels.
+ * @returns {Thing | undefined}
+ */
+function findAtPoint(things, point) {
+  const tileX = Math.floor(point.x / TILE_SIZE)
+  const tileY = Math.floor(point.y / TILE_SIZE)
+  return things.find((thing) => thing.tileX === tileX && thing.tileY === tileY)
 }

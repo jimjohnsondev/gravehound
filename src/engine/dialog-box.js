@@ -163,11 +163,7 @@ export class DialogBox {
       this.speakerName = this.conversation.fillIn(this.speaker.name)
     }
 
-    const lines = wrapText(this.shown.text, TEXT_BOX.width - TEXT_INSET_X * 2 - ARROW_SPACE)
-    this.pages = []
-    for (let start = 0; start < lines.length; start += LINES_PER_PAGE) {
-      this.pages.push(lines.slice(start, start + LINES_PER_PAGE))
-    }
+    this.pages = splitIntoPages(this.shown.text)
     this.page = 0
   }
 
@@ -214,7 +210,7 @@ export class DialogBox {
    * @param {string[]} choices
    */
   #drawMenu(ctx, choices) {
-    const width = SCREEN_WIDTH - MARGIN * 2
+    const width = TEXT_BOX.width
     const wrapped = choices.map((choice) => wrapText(choice, width - TEXT_INSET_X * 2 - CURSOR_SPACE))
 
     let lineCount = 0
@@ -236,6 +232,21 @@ export class DialogBox {
       }
     })
   }
+}
+
+/**
+ * Wrap a line of dialog to fit the text box, in pages of LINES_PER_PAGE lines.
+ * @param {string} text
+ * @returns {string[][]}
+ */
+function splitIntoPages(text) {
+  const lines = wrapText(text, TEXT_BOX.width - TEXT_INSET_X * 2 - ARROW_SPACE)
+  /** @type {string[][]} */
+  const pages = []
+  for (let start = 0; start < lines.length; start += LINES_PER_PAGE) {
+    pages.push(lines.slice(start, start + LINES_PER_PAGE))
+  }
+  return pages
 }
 
 /**
@@ -263,7 +274,7 @@ function drawArrow(ctx, box) {
   const x = box.x + box.width - TEXT_INSET_X - ARROW_WIDTH
   const y = box.y + box.height - TEXT_INSET_Y - ARROW_HEIGHT
   ctx.fillStyle = UI_COLORS.text
-  ctx.fillRect(x, y, 5, 1)
+  ctx.fillRect(x, y, ARROW_WIDTH, 1)
   ctx.fillRect(x + 1, y + 1, 3, 1)
   ctx.fillRect(x + 2, y + 2, 1, 1)
 }

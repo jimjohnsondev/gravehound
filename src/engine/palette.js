@@ -19,7 +19,7 @@ export const MAX_LIGHT_LEVEL = 4
  * deep darkness converges on the same night colours.
  * @type {Record<string, string[]>}
  */
-export const RAMPS = {
+const RAMPS = {
   grass: ['#6f9a4a', '#4f7a3a', '#365a32', '#22402b', '#152a22', '#0d1a18', '#0b0a12'],
   leaf: ['#3f6b3a', '#2c5233', '#1e3c2c', '#142a24', '#0e1c1b', '#0b1214', '#0b0a12'],
   earth: ['#a88458', '#86663f', '#664b30', '#4a3626', '#30241d', '#1c1616', '#0b0a12'],

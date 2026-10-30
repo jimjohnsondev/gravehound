@@ -3,7 +3,7 @@
  * Change them here, never as magic numbers elsewhere.
  */
 
-/** Width of the game screen in pixels (Atari-style resolution). */
+/** Width of the game screen in pixels (Game Gear size). */
 export const SCREEN_WIDTH = 160
 
 /** Height of the game screen in pixels. */

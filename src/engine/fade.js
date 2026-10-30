@@ -49,7 +49,7 @@ export class Fade {
     if (this.state === 'out') {
       this.stepIndex++
       if (this.stepIndex === FADE_STEPS.length - 1) {
-        this.onBlack?.()
+        this.onBlack()
         this.onBlack = null
         this.state = 'in'
       }
