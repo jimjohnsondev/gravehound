@@ -5,6 +5,7 @@
  * schedules the notes due in the next moment, and the audio system plays them
  * at exactly the right time.
  */
+import { UPDATES_PER_SECOND } from './config.js'
 
 /** How far ahead notes are scheduled, in seconds. Longer than a slow frame. */
 const SCHEDULE_AHEAD = 0.15
@@ -16,7 +17,7 @@ const START_DELAY = 0.05
 const NOTE_LENGTH = 0.9
 
 /** Volume steps are timed in game updates, like a real program driving the chip. */
-const SECONDS_PER_UPDATE = 1 / 60
+const SECONDS_PER_UPDATE = 1 / UPDATES_PER_SECOND
 
 /** A note never fades below this volume until it's cut off. */
 const QUIETEST_VOLUME = 1
@@ -50,7 +51,9 @@ export class MusicPlayer {
   /** @param {number} now  In audio context seconds. */
   stop(now) {
     if (!this.song) return
-    this.song.channels.forEach((_, channel) => this.pokey.channels[channel].clear(now))
+    for (let channel = 0; channel < this.song.channels.length; channel++) {
+      this.pokey.channels[channel].clear(now)
+    }
     this.song = null
   }
 
@@ -89,15 +92,24 @@ export class MusicPlayer {
   #playNote(pokeyChannel, { distortion, volume, decay }, { audf, clock, steps }, time) {
     const end = time + steps * this.song.stepSeconds * NOTE_LENGTH
     pokeyChannel.write(time, { audf, clock, distortion, volume })
-
-    if (decay > 0) {
-      const secondsPerDrop = decay * SECONDS_PER_UPDATE
-      let fadeTime = time + secondsPerDrop
-      for (let level = volume - 1; level >= QUIETEST_VOLUME && fadeTime < end; level--) {
-        pokeyChannel.setVolume(fadeTime, level)
-        fadeTime += secondsPerDrop
-      }
-    }
+    if (decay > 0) scheduleFade(pokeyChannel, volume, decay, time, end)
     pokeyChannel.setVolume(end, 0)
+  }
+}
+
+/**
+ * Step a note's volume down from when it starts until it ends.
+ * @param {import('./pokey.js').Pokey['channels'][number]} pokeyChannel
+ * @param {number} volume  What the note started at.
+ * @param {number} decay   Update steps for each drop of 1 in volume.
+ * @param {number} start
+ * @param {number} end
+ */
+function scheduleFade(pokeyChannel, volume, decay, start, end) {
+  const secondsPerDrop = decay * SECONDS_PER_UPDATE
+  let fadeTime = start + secondsPerDrop
+  for (let level = volume - 1; level >= QUIETEST_VOLUME && fadeTime < end; level--) {
+    pokeyChannel.setVolume(fadeTime, level)
+    fadeTime += secondsPerDrop
   }
 }

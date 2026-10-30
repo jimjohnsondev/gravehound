@@ -5,7 +5,7 @@
 import { SCREEN_WIDTH, UPDATES_PER_SECOND } from '../engine/config.js'
 import { GLYPH_HEIGHT } from '../engine/font-glyphs.js'
 import { UI_COLORS } from '../engine/palette.js'
-import { PANEL_BORDER, drawPanel } from '../engine/panel.js'
+import { PANEL_BORDER, PANEL_TEXT_INSET, drawPanel } from '../engine/panel.js'
 import { drawText, measureText } from '../engine/text.js'
 
 /** How long the banner is on screen, sliding included (60 per second). */
@@ -21,7 +21,7 @@ const SLIDE_STEP = 4
 const MARGIN_TOP = 4
 
 /** Distance from the outside of the banner to its text. */
-const TEXT_INSET_X = PANEL_BORDER + 4
+const TEXT_INSET_X = PANEL_TEXT_INSET
 const TEXT_INSET_Y = PANEL_BORDER + 3
 
 const BANNER_HEIGHT = GLYPH_HEIGHT + TEXT_INSET_Y * 2

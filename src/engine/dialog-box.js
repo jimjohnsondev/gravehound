@@ -70,11 +70,12 @@ export class DialogBox {
    * @param {object} options
    * @param {Record<string, Speaker>} options.speakers  By speaker id, e.g. 'WREN'.
    * @param {Record<string, CanvasImageSource>} options.backgrounds  Full-screen pictures.
-   * @param {(name: 'talk' | 'cursor' | 'confirm') => void} options.playSound
+   * @param {import('./sound.js').Sound} options.sound  Needs effects called
+   *   'talk', 'cursor' and 'confirm'.
    */
-  constructor({ speakers, backgrounds, playSound }) {
+  constructor({ speakers, backgrounds, sound }) {
     this.speakers = speakers
-    this.playSound = playSound
+    this.sound = sound
     this.backgrounds = backgrounds
     /** @type {import('./talk-runner.js').Conversation | null} */
     this.conversation = null
@@ -129,15 +130,15 @@ export class DialogBox {
 
     if (shown.type === 'menu') {
       const selected = moveCursor(input, this.selected, shown.choices.length)
-      if (selected !== this.selected) this.playSound('cursor')
+      if (selected !== this.selected) this.sound.play('cursor')
       this.selected = selected
       if (input.wasPressed('a')) {
-        this.playSound('confirm')
+        this.sound.play('confirm')
         this.conversation.choose(this.selected)
         this.#advance()
       }
     } else if (input.wasPressed('a')) {
-      this.playSound('talk')
+      this.sound.play('talk')
       if (this.page < this.pages.length - 1) this.page++
       else this.#advance()
     }

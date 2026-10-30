@@ -6,6 +6,7 @@
  * starts until the first tap or key press. A song asked for before then starts
  * at that moment, and sound effects before then are simply skipped.
  */
+import { UPDATES_PER_SECOND } from './config.js'
 import { MusicPlayer } from './music-player.js'
 import { CHANNEL_COUNT, CLOCK_64K, Pokey } from './pokey.js'
 
@@ -16,7 +17,7 @@ const EFFECT_CHANNEL = CHANNEL_COUNT - 1
 export const SONG_CHANNEL_COUNT = EFFECT_CHANNEL
 
 /** Each step of an effect lasts one game update. */
-const SECONDS_PER_EFFECT_STEP = 1 / 60
+const SECONDS_PER_EFFECT_STEP = 1 / UPDATES_PER_SECOND
 
 /** Any of these counts as the player touching the page. Phones differ on which they accept. */
 const UNLOCK_EVENTS = ['pointerdown', 'pointerup', 'touchend', 'keydown']
@@ -67,20 +68,26 @@ export class Sound {
   }
 
   /**
-   * Create the audio system on the first touch. Later touches matter too:
-   * phones can suspend it again after a call or a trip to another app.
+   * Later touches matter as well as the first: phones can suspend audio again
+   * after a call or a trip to another app.
    */
   #unlock() {
-    if (!this.context) {
-      if (!window.AudioContext) return
-      this.context = new AudioContext()
-      this.master = this.context.createGain()
-      this.master.gain.value = this.muted ? 0 : 1
-      this.master.connect(this.context.destination)
-      this.pokey = new Pokey(this.context, this.master)
-      this.music = new MusicPlayer(this.pokey)
-    }
+    if (!window.AudioContext) return
+    if (!this.context) this.#createAudio()
     if (this.context.state !== 'running') this.context.resume()
+  }
+
+  #createAudio() {
+    this.context = new AudioContext()
+    this.master = this.context.createGain()
+    this.master.connect(this.context.destination)
+    this.#applyMute()
+    this.pokey = new Pokey(this.context, this.master)
+    this.music = new MusicPlayer(this.pokey)
+  }
+
+  #applyMute() {
+    if (this.master) this.master.gain.value = this.muted ? 0 : 1
   }
 
   /**
@@ -89,7 +96,7 @@ export class Sound {
    */
   setMuted(muted) {
     this.muted = muted
-    if (this.master) this.master.gain.value = muted ? 0 : 1
+    this.#applyMute()
   }
 
   /**

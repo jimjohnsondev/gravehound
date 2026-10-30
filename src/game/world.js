@@ -51,7 +51,7 @@ export class World {
     this.fade = new Fade()
     this.banner = new MapBanner()
     this.sound = sound
-    this.dialog = new DialogBox({ speakers, backgrounds, playSound: (name) => sound.play(name) })
+    this.dialog = new DialogBox({ speakers, backgrounds, sound })
     this.story = new StoryState(STATS)
     this.menu = new PauseMenu(sound)
     this.heroName = PLACEHOLDER_HERO_NAME
