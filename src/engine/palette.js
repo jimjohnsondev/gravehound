@@ -58,6 +58,7 @@ export const CHARACTER_COLORS = {
   wisp: '#c8f0ff',
   greyHair: '#cfc8d8',
   shawl: '#4a5a9a',
+  jerkin: '#b08a3e',
   eyeWhite: '#f4f0e8',
 }
 

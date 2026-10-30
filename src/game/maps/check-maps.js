@@ -2,6 +2,7 @@
  * Checks that maps make sense, so a typo stops the game loading instead of
  * freezing it or trapping the player the first time someone walks there.
  */
+import { MIN_WANDER_RADIUS } from '../npc.js'
 import { FLAGS } from '../story-flags.js'
 import { CLOSED_CHEST_TILE, TILE_TYPES } from '../tiles.js'
 
@@ -22,6 +23,7 @@ export function checkMaps(maps, scenes, npcSprites) {
     checkRowWidths(map, problems)
     checkExits(map, maps, problems)
     checkChests(map, chestFlags, problems)
+    checkNpcs(map, problems)
 
     for (const { scene } of [...map.npcs, ...map.spots, ...map.chests]) {
       if (!scenes[scene]) problems.push(`${map.id}: no dialog scene called "${scene}"`)
@@ -62,13 +64,55 @@ function checkExits(map, maps, problems) {
     }
 
     const arrival = `${map.id}: exit arrives at ${toMap} tile ${arriveX}, ${arriveY}`
-    const isHere = (/** @type {{tileX: number, tileY: number}} */ thing) =>
-      thing.tileX === arriveX && thing.tileY === arriveY
-
     if (!isWalkable(target, arriveX, arriveY)) problems.push(`${arrival}, which isn't walkable`)
-    if (target.npcs.some(isHere)) problems.push(`${arrival}, where an NPC is standing`)
-    if (target.exits.some(isHere)) problems.push(`${arrival}, which is itself an exit`)
+    if (target.npcs.some((npc) => isOnTile(npc, arriveX, arriveY))) {
+      problems.push(`${arrival}, where an NPC is standing`)
+    }
+    if (target.exits.some((exit) => isOnTile(exit, arriveX, arriveY))) {
+      problems.push(`${arrival}, which is itself an exit`)
+    }
   }
+}
+
+/**
+ * Mistakes here don't crash anything: the NPC just never moves, which is easy
+ * to miss, so they're worth stopping at load.
+ * @param {import('./index.js').MapDefinition} map
+ * @param {string[]} problems
+ */
+function checkNpcs(map, problems) {
+  map.npcs.forEach((npc, index) => {
+    const { tileX, tileY, wanderRadius = 0 } = npc
+    const name = `${map.id}: NPC at tile ${tileX}, ${tileY}`
+
+    const sharesHome = map.npcs.slice(index + 1).some((other) => isOnTile(other, tileX, tileY))
+    if (sharesHome) problems.push(`${name} shares its home tile with another NPC`)
+
+    if (wanderRadius === 0) return
+    if (wanderRadius < MIN_WANDER_RADIUS) {
+      problems.push(`${name} has wanderRadius ${wanderRadius}, the smallest is ${MIN_WANDER_RADIUS}`)
+    }
+    if (!isWalkable(map, tileX, tileY)) problems.push(`${name} wanders, but its home tile isn't walkable`)
+  })
+}
+
+/**
+ * The tile character at a position, or undefined if that's outside the map.
+ * @param {import('./index.js').MapDefinition} map
+ * @param {number} tileX
+ * @param {number} tileY
+ */
+function tileAt(map, tileX, tileY) {
+  return map.rows[tileY]?.[tileX]
+}
+
+/**
+ * @param {{tileX: number, tileY: number}} thing
+ * @param {number} tileX
+ * @param {number} tileY
+ */
+function isOnTile(thing, tileX, tileY) {
+  return thing.tileX === tileX && thing.tileY === tileY
 }
 
 /**
@@ -78,8 +122,7 @@ function checkExits(map, maps, problems) {
  * @param {number} tileY
  */
 function isWalkable(map, tileX, tileY) {
-  const character = map.rows[tileY]?.[tileX]
-  return TILE_TYPES[character]?.solid === false
+  return TILE_TYPES[tileAt(map, tileX, tileY)]?.solid === false
 }
 
 /**
@@ -90,7 +133,7 @@ function isWalkable(map, tileX, tileY) {
  */
 function checkChests(map, chestFlags, problems) {
   for (const { tileX, tileY, openedFlag } of map.chests) {
-    if (map.rows[tileY]?.[tileX] !== CLOSED_CHEST_TILE) {
+    if (tileAt(map, tileX, tileY) !== CLOSED_CHEST_TILE) {
       problems.push(`${map.id}: chest at tile ${tileX}, ${tileY} has no ${CLOSED_CHEST_TILE} tile`)
     }
     if (!FLAGS[openedFlag]) problems.push(`${map.id}: unknown flag "${openedFlag}"`)
@@ -101,7 +144,7 @@ function checkChests(map, chestFlags, problems) {
   map.rows.forEach((row, tileY) => {
     for (let tileX = 0; tileX < row.length; tileX++) {
       if (row[tileX] !== CLOSED_CHEST_TILE) continue
-      const isListed = map.chests.some((chest) => chest.tileX === tileX && chest.tileY === tileY)
+      const isListed = map.chests.some((chest) => isOnTile(chest, tileX, tileY))
       if (!isListed) problems.push(`${map.id}: ${CLOSED_CHEST_TILE} tile at ${tileX}, ${tileY} isn't in chests`)
     }
   })

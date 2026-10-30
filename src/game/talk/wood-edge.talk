@@ -1,8 +1,12 @@
 # The wood's edge, Act I.
-# PLACEHOLDER: the sign and chest are here to test interacting with A.
+# PLACEHOLDER: the sign, chest and woodcutter are here to test the engine.
 
 == wood_sign ==
 The paint has nearly flaked away. All you can make out is the word Hollin.
+
+
+== woodcutter_chat ==
+WOODCUTTER: Dark comes early under these trees. Get that dog home, lad.
 
 
 == wood_chest ==

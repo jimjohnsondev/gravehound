@@ -9,7 +9,7 @@
 /** @typedef {'down' | 'up' | 'left' | 'right'} Facing */
 
 /** Row order in a character sprite sheet. @type {Facing[]} */
-const FACINGS = ['down', 'up', 'left', 'right']
+export const FACINGS = ['down', 'up', 'left', 'right']
 
 /**
  * One step in each facing, as x and y.

@@ -26,6 +26,7 @@ const PLACEHOLDER_HERO_NAME = 'Rowan'
 const PAUSE_OVERLAY = 'rgba(0, 0, 0, 0.5)'
 
 /** @typedef {import('./maps/index.js').MapDefinition} MapDefinition */
+/** @typedef {import('./character.js').Character} Character */
 
 /** Everything in play. Call `enterMap` once before the first update or draw. */
 export class World {
@@ -149,18 +150,24 @@ export class World {
     if (input.wasPressed('a')) this.#interact()
     if (this.dialog.active) return
 
-    this.hero.update(input.direction(), (box) => this.#isBlocked(box))
+    const isBlocked = (/** @type {Character} */ character) => this.#isBlocked(character)
+    this.hero.update(input.direction(), isBlocked)
     this.ash.update(this.hero)
+    for (const npc of this.npcs) npc.update(isBlocked)
     this.camera.follow(this.mapDefinition.mode, this.tileMap, this.hero.center)
     this.#checkExits()
   }
 
   /**
-   * Is a box (in map pixels) walking into something?
-   * @param {{x: number, y: number, width: number, height: number}} box
+   * Is someone walking into a solid tile or another person? The hero and NPCs
+   * all block each other, so nobody can end up standing inside anyone else and
+   * get stuck. Ash doesn't block anyone, so he can't trap the hero in a corner.
+   * @param {Character} character
    */
-  #isBlocked(box) {
-    return this.tileMap.overlapsSolid(this.tileset, box) || this.npcs.some((npc) => npc.overlaps(box))
+  #isBlocked(character) {
+    if (this.tileMap.overlapsSolid(this.tileset, character)) return true
+    const everyone = [this.hero, ...this.npcs]
+    return everyone.some((other) => other !== character && other.overlaps(character))
   }
 
   /** A was pressed: act on whatever is right in front of the hero. */

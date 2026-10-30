@@ -27,6 +27,12 @@ export const CAST = {
     expressions: ['neutral', 'happy', 'worried', 'sad', 'afraid'],
     look: { skin: C.skin, hair: C.greyHair, clothes: C.shawl, old: true },
   },
+  // PLACEHOLDER: here to test wandering NPCs. Not part of the story.
+  WOODCUTTER: {
+    name: 'Woodcutter',
+    expressions: ['neutral'],
+    look: { skin: C.skin, hair: C.greyHair, clothes: C.jerkin, old: false },
+  },
 }
 
 /**

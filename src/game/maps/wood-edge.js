@@ -43,7 +43,9 @@ export const woodEdge = {
     // Back into the cottage.
     { tileX: 9, tileY: 6, toMap: 'cottage', arriveX: 4, arriveY: 7, facing: 'up' },
   ],
-  npcs: [],
+  npcs: [
+    { sprite: 'woodcutter', tileX: 13, tileY: 8, facing: 'down', scene: 'woodcutter_chat', wanderRadius: 2 },
+  ],
   spots: [
     { tileX: 10, tileY: 7, scene: 'wood_sign' },
   ],

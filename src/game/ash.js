@@ -2,15 +2,13 @@
  * Ash, the dog. He follows the hero's footsteps a short way behind, the way
  * party members do in classic RPGs.
  */
+import { WALK_FRAME_COUNT } from './character.js'
 
 /** How many hero steps behind Ash walks. */
 const FOLLOW_DELAY = 18
 
 /** Update steps between walk animation frames. */
 const STEPS_PER_FRAME = 6
-
-/** Frames in the walk animation. */
-const WALK_FRAME_COUNT = 2
 
 /** Ash's feet are this many pixels below his position. */
 const FEET_OFFSET = 3

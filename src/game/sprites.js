@@ -11,8 +11,17 @@ import { CHARACTER_COLORS as C } from '../engine/palette.js'
 /** Width and height of one frame of Ash. */
 const ASH_SIZE = 16
 
-/** The hero: 12x16, 2 frames (standing, stepping). */
+/** The hero. */
 export function createHeroSprites() {
+  return paintPersonSprites(C.hair, C.tunic)
+}
+
+/**
+ * Someone young and plain: 12x16, 2 frames (standing, stepping).
+ * @param {string} hair
+ * @param {string} tunic
+ */
+function paintPersonSprites(hair, tunic) {
   return paintSpriteSheet({
     frameWidth: 12,
     frameHeight: 16,
@@ -21,9 +30,9 @@ export function createHeroSprites() {
       const stepping = frame === 1
 
       // Head
-      draw.rect(3, 0, 6, 3, C.hair)
+      draw.rect(3, 0, 6, 3, hair)
       if (facing === 'up') {
-        draw.rect(3, 3, 6, 4, C.hair)
+        draw.rect(3, 3, 6, 4, hair)
       } else {
         draw.rect(3, 3, 6, 4, C.skin)
         if (facing === 'down') {
@@ -31,13 +40,13 @@ export function createHeroSprites() {
           draw.rect(7, 4, 1, 1, C.outline)
         } else {
           const back = facing === 'left' ? 7 : 3
-          draw.rect(back, 3, 2, 3, C.hair)
+          draw.rect(back, 3, 2, 3, hair)
           draw.rect(facing === 'left' ? 4 : 7, 4, 1, 1, C.outline)
         }
       }
 
       // Body and arms
-      draw.rect(2, 7, 8, 5, C.tunic)
+      draw.rect(2, 7, 8, 5, tunic)
       draw.rect(1, 8, 1, 3, C.skin)
       draw.rect(10, 8, 1, 3, C.skin)
       draw.rect(3, 12, 6, 2, C.trousers)
@@ -54,7 +63,10 @@ export function createHeroSprites() {
  * @returns {Record<string, import('../engine/sprite.js').SpriteSheet>}
  */
 export function createNpcSprites() {
-  return { wren: createWrenSprites() }
+  return {
+    wren: createWrenSprites(),
+    woodcutter: paintPersonSprites(C.greyHair, C.jerkin),
+  }
 }
 
 /** Grandmother Wren: 12x16, 2 frames (standing, stepping). */

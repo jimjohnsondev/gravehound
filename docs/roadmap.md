@@ -27,7 +27,7 @@ Still to do for milestone 1:
       hard-coded sizes in `game/backgrounds.js`, and re-fit the dialog box,
       portraits and map banner to the smaller screen
 - [x] Interact with A: talk to NPCs, read signs, open chests
-- [ ] NPCs that wander (standing still already works)
+- [x] NPCs that stand still or wander
 - [ ] Menu screen (replacing the current pause)
 - [ ] Sound: a POKEY-style synth on Web Audio, sound effects, and a music player
 - [ ] Save and load in localStorage
