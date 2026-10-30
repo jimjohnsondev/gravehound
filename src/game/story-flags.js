@@ -29,8 +29,13 @@ export const STATS = {
   heart: 1,
 }
 
-/** Things [give ...] can hand to the hero. */
+/**
+ * Things [give ...] can hand to the hero, with what the menu shows for each.
+ * @type {Record<string, {name: string, description: string}>}
+ */
 export const ITEMS = {
-  fathers_knife: 'Given by Grandmother at supper. Unlocks the one-button attack.',
-  tinderbox: "PLACEHOLDER: in the chest at the wood's edge.",
+  // Given by Grandmother at supper. Unlocks the one-button attack.
+  fathers_knife: { name: "Father's knife", description: 'A plain knife with a worn horn handle.' },
+  // PLACEHOLDER: in the chest at the wood's edge.
+  tinderbox: { name: 'Tinderbox', description: 'A tin box, gone green at the hinges.' },
 }

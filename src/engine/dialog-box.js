@@ -5,28 +5,25 @@
  */
 import { PORTRAIT_HEIGHT, PORTRAIT_WIDTH, SCREEN_HEIGHT, SCREEN_WIDTH } from './config.js'
 import { GLYPH_HEIGHT } from './font-glyphs.js'
+import { moveCursor } from './input.js'
 import { UI_COLORS } from './palette.js'
-import { PANEL_BORDER, drawPanel } from './panel.js'
+import {
+  CURSOR_SPACE,
+  LINE_HEIGHT,
+  PANEL_BORDER,
+  PANEL_MARGIN,
+  PANEL_TEXT_INSET,
+  drawCursor,
+  drawPanel,
+  panelHeight,
+} from './panel.js'
 import { drawText, measureText, wrapText } from './text.js'
-
-/** Gap between the boxes and the screen edges. */
-const MARGIN = 2
-
-/** Distance from the outside of a box to its text. */
-const TEXT_INSET_X = PANEL_BORDER + 4
-const TEXT_INSET_Y = PANEL_BORDER + 4
 
 /** Space above and below the name in the speaker's name tab. */
 const NAME_PADDING_Y = 2
 
-/** Distance from the top of one line of text to the top of the next. */
-const LINE_HEIGHT = GLYPH_HEIGHT + 2
-
 /** Lines shown at once. A longer line carries on over more pages. */
 const LINES_PER_PAGE = 3
-
-/** Room on the left of each choice for the cursor. */
-const CURSOR_SPACE = 6
 
 /** Width of the "press A" arrow. */
 const ARROW_WIDTH = 5
@@ -61,10 +58,10 @@ const BLINK_DURATION = 20
  * @type {Box}
  */
 const TEXT_BOX = {
-  x: MARGIN,
-  y: SCREEN_HEIGHT - MARGIN - boxHeight(LINES_PER_PAGE),
-  width: SCREEN_WIDTH - MARGIN * 2,
-  height: boxHeight(LINES_PER_PAGE),
+  x: PANEL_MARGIN,
+  y: SCREEN_HEIGHT - PANEL_MARGIN - panelHeight(LINES_PER_PAGE),
+  width: SCREEN_WIDTH - PANEL_MARGIN * 2,
+  height: panelHeight(LINES_PER_PAGE),
 }
 
 /** Shows a Conversation. A turns the page; up, down and A pick a choice. */
@@ -129,9 +126,7 @@ export class DialogBox {
     this.timer++
 
     if (shown.type === 'menu') {
-      const count = shown.choices.length
-      if (input.wasPressed('up')) this.selected = (this.selected + count - 1) % count
-      if (input.wasPressed('down')) this.selected = (this.selected + 1) % count
+      this.selected = moveCursor(input, this.selected, shown.choices.length)
       if (input.wasPressed('a')) {
         this.conversation.choose(this.selected)
         this.#advance()
@@ -190,14 +185,14 @@ export class DialogBox {
       ctx.drawImage(
         this.speaker.portraits,
         column * PORTRAIT_WIDTH, 0, PORTRAIT_WIDTH, PORTRAIT_HEIGHT,
-        MARGIN, box.y - PORTRAIT_HEIGHT, PORTRAIT_WIDTH, PORTRAIT_HEIGHT,
+        PANEL_MARGIN, box.y - PORTRAIT_HEIGHT, PORTRAIT_WIDTH, PORTRAIT_HEIGHT,
       )
       drawNameTab(ctx, box, this.speakerName)
     }
 
     drawPanel(ctx, box.x, box.y, box.width, box.height)
     this.pages[this.page].forEach((line, index) => {
-      drawText(ctx, line, box.x + TEXT_INSET_X, box.y + TEXT_INSET_Y + index * LINE_HEIGHT, UI_COLORS.text)
+      drawText(ctx, line, box.x + PANEL_TEXT_INSET, box.y + PANEL_TEXT_INSET + index * LINE_HEIGHT, UI_COLORS.text)
     })
 
     if (this.timer % (BLINK_DURATION * 2) < BLINK_DURATION) drawArrow(ctx, box)
@@ -211,17 +206,17 @@ export class DialogBox {
    */
   #drawMenu(ctx, choices) {
     const width = TEXT_BOX.width
-    const wrapped = choices.map((choice) => wrapText(choice, width - TEXT_INSET_X * 2 - CURSOR_SPACE))
+    const wrapped = choices.map((choice) => wrapText(choice, width - PANEL_TEXT_INSET * 2 - CURSOR_SPACE))
 
     let lineCount = 0
     for (const lines of wrapped) lineCount += lines.length
 
-    const height = boxHeight(lineCount)
-    const y = SCREEN_HEIGHT - MARGIN - height
-    drawPanel(ctx, MARGIN, y, width, height)
+    const height = panelHeight(lineCount)
+    const y = SCREEN_HEIGHT - PANEL_MARGIN - height
+    drawPanel(ctx, PANEL_MARGIN, y, width, height)
 
-    const cursorX = MARGIN + TEXT_INSET_X
-    let textY = y + TEXT_INSET_Y
+    const cursorX = PANEL_MARGIN + PANEL_TEXT_INSET
+    let textY = y + PANEL_TEXT_INSET
     wrapped.forEach((lines, index) => {
       const isSelected = index === this.selected
       if (isSelected) drawCursor(ctx, cursorX, textY)
@@ -240,7 +235,7 @@ export class DialogBox {
  * @returns {string[][]}
  */
 function splitIntoPages(text) {
-  const lines = wrapText(text, TEXT_BOX.width - TEXT_INSET_X * 2 - ARROW_SPACE)
+  const lines = wrapText(text, TEXT_BOX.width - PANEL_TEXT_INSET * 2 - ARROW_SPACE)
   /** @type {string[][]} */
   const pages = []
   for (let start = 0; start < lines.length; start += LINES_PER_PAGE) {
@@ -256,13 +251,13 @@ function splitIntoPages(text) {
  * @param {string} name
  */
 function drawNameTab(ctx, box, name) {
-  const width = measureText(name) + TEXT_INSET_X * 2
+  const width = measureText(name) + PANEL_TEXT_INSET * 2
   const height = GLYPH_HEIGHT + NAME_PADDING_Y * 2 + PANEL_BORDER * 2
   // Overlap the box so the two borders join up.
   const y = box.y - height + PANEL_BORDER
-  const x = box.x + PORTRAIT_WIDTH + MARGIN
+  const x = box.x + PORTRAIT_WIDTH + PANEL_MARGIN
   drawPanel(ctx, x, y, width, height)
-  drawText(ctx, name, x + TEXT_INSET_X, y + PANEL_BORDER + NAME_PADDING_Y, UI_COLORS.text)
+  drawText(ctx, name, x + PANEL_TEXT_INSET, y + PANEL_BORDER + NAME_PADDING_Y, UI_COLORS.text)
 }
 
 /**
@@ -271,33 +266,11 @@ function drawNameTab(ctx, box, name) {
  * @param {Box} box
  */
 function drawArrow(ctx, box) {
-  const x = box.x + box.width - TEXT_INSET_X - ARROW_WIDTH
-  const y = box.y + box.height - TEXT_INSET_Y - ARROW_HEIGHT
+  const x = box.x + box.width - PANEL_TEXT_INSET - ARROW_WIDTH
+  const y = box.y + box.height - PANEL_TEXT_INSET - ARROW_HEIGHT
   ctx.fillStyle = UI_COLORS.text
   // Each row is one pixel narrower on both sides than the row above.
   for (let row = 0; row < ARROW_HEIGHT; row++) {
     ctx.fillRect(x + row, y + row, ARROW_WIDTH - row * 2, 1)
   }
-}
-
-/**
- * A small right-pointing triangle beside the selected choice.
- * @param {CanvasRenderingContext2D} ctx
- * @param {number} x
- * @param {number} textY  Top of the choice's text.
- */
-function drawCursor(ctx, x, textY) {
-  ctx.fillStyle = UI_COLORS.text
-  ctx.fillRect(x, textY + 1, 1, 5)
-  ctx.fillRect(x + 1, textY + 2, 1, 3)
-  ctx.fillRect(x + 2, textY + 3, 1, 1)
-}
-
-/**
- * Height of a box holding `lineCount` lines of text, border included.
- * @param {number} lineCount
- */
-function boxHeight(lineCount) {
-  const textHeight = (lineCount - 1) * LINE_HEIGHT + GLYPH_HEIGHT
-  return textHeight + TEXT_INSET_Y * 2
 }

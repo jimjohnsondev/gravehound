@@ -28,7 +28,7 @@ Still to do for milestone 1:
       portraits and map banner to the smaller screen
 - [x] Interact with A: talk to NPCs, read signs, open chests
 - [x] NPCs that stand still or wander
-- [ ] Menu screen (replacing the current pause)
+- [x] Menu screen (replacing the current pause)
 - [ ] Sound: a POKEY-style synth on Web Audio, sound effects, and a music player
 - [ ] Save and load in localStorage
 - [ ] Death and the Underreach loop: fall into the netherworld, then find the way up

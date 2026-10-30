@@ -63,7 +63,7 @@ Do this before the first edit, or there's nothing to compare against.
    the two totals differ, the check itself isn't reliable, so fix that first.
 
 The script hashes every pixel of the canvas across every map, the banner's
-slide, the pause screen, and every line and menu of every dialog scene on
+slide, every page of the menu, and every line and menu of every dialog scene on
 several paths. It needs no browser window to be visible, unlike screenshots.
 
 ## 3. Refactor
@@ -72,7 +72,8 @@ Work in small themed passes and run `npm run check` after each one. Long edit
 scripts are safer saved as a file in the scratchpad than passed inline to Bash.
 
 The script reads these names: `world.maps`, `enterMap`, `talk`, `scenes`,
-`draw`, `paused`, `banner.timeLeft`, `story`, and on `dialog`: `active`,
+`draw`, `banner.timeLeft`, `story`, on `menu`: `open`, `close`, `page`,
+`itemCursor`, and on `dialog`: `active`,
 `shown`, `pages`, `page`, `selected`, `timer`, `update`. If the refactor renames
 one, update the script to match, and say so in your report.
 

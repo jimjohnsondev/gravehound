@@ -3,7 +3,7 @@
 // refactor: the returned `total` must match. Reload afterwards, because it
 // leaves the game in a test state.
 
-const { FLAGS, COUNTERS, STATS } = await import('/src/game/story-flags.js')
+const { FLAGS, COUNTERS, STATS, ITEMS } = await import('/src/game/story-flags.js')
 
 const world = gravehound.world
 const dialog = world.dialog
@@ -37,7 +37,7 @@ function resetStory() {
   dialog.conversation = null
   dialog.shown = null
   dialog.background = null
-  world.paused = false
+  world.menu.close()
 }
 
 /** Everything on: flags set, numbers high, so `[if ...]` lines all show. */
@@ -96,9 +96,21 @@ for (const [id, map] of Object.entries(world.maps)) {
 }
 
 world.banner.timeLeft = 0
-world.paused = true
+// Every page of the menu, with and without items in the list.
+world.menu.open(world.story, 'Rowan')
 sections.paused = [hashScreen()]
-world.paused = false
+for (const page of ['items', 'status']) {
+  world.menu.page = page
+  sections[`menu ${page}, nothing found`] = [hashScreen()]
+}
+for (const item of Object.keys(ITEMS)) world.story.items.add(item)
+world.menu.page = 'items'
+sections['menu items'] = Object.keys(ITEMS).map((item, index) => {
+  world.menu.itemCursor = index
+  return hashScreen()
+})
+world.menu.close()
+world.story.items.clear()
 
 const paths = {
   'flags off, first choices': { setup: () => {}, pick: () => 0 },

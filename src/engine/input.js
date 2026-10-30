@@ -53,6 +53,21 @@ const DPAD_SLICES = [
 /** Analog stick must be pushed this far to count as a direction. */
 const STICK_DEAD_ZONE = 0.4
 
+/**
+ * Where a menu cursor ends up after any up or down press, wrapping at the ends.
+ * @param {{wasPressed: (button: Button) => boolean}} input
+ * @param {number} cursor
+ * @param {number} count  How many rows the menu has.
+ * @returns {number}
+ */
+export function moveCursor(input, cursor, count) {
+  if (count === 0) return 0
+  let moved = cursor
+  if (input.wasPressed('up')) moved = (moved + count - 1) % count
+  if (input.wasPressed('down')) moved = (moved + 1) % count
+  return moved
+}
+
 /** The current state of the game's buttons. Call `update()` once per update step. */
 export class Input {
   constructor() {

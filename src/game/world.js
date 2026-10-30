@@ -15,15 +15,13 @@ import { Ash } from './ash.js'
 import { Hero } from './hero.js'
 import { MapBanner } from './map-banner.js'
 import { Npc } from './npc.js'
+import { PauseMenu } from './pause-menu.js'
 import { STATS } from './story-flags.js'
 import { TALK_ACTIONS } from './talk-actions.js'
 import { OPEN_CHEST_TILE } from './tiles.js'
 
 /** PLACEHOLDER until there's a title screen where the player names the hero. */
 const PLACEHOLDER_HERO_NAME = 'Rowan'
-
-/** Laid over the whole screen while the game is paused. */
-const PAUSE_OVERLAY = 'rgba(0, 0, 0, 0.5)'
 
 /** @typedef {import('./maps/index.js').MapDefinition} MapDefinition */
 /** @typedef {import('./character.js').Character} Character */
@@ -53,6 +51,7 @@ export class World {
     this.banner = new MapBanner()
     this.dialog = new DialogBox({ speakers, backgrounds })
     this.story = new StoryState(STATS)
+    this.menu = new PauseMenu()
     this.heroName = PLACEHOLDER_HERO_NAME
 
     /** @type {MapDefinition | null} */
@@ -62,7 +61,6 @@ export class World {
     /** @type {Npc[]} */
     this.npcs = []
     this.lightLevel = 0
-    this.paused = false
   }
 
   /**
@@ -135,8 +133,14 @@ export class World {
       return
     }
 
-    if (input.wasPressed('menu')) this.paused = !this.paused
-    if (this.paused) return
+    if (this.menu.active) {
+      this.menu.update(input)
+      return
+    }
+    if (input.wasPressed('menu')) {
+      this.menu.open(this.story, this.heroName)
+      return
+    }
 
     // Counted only during play, so the banner is never used up behind a fade.
     this.banner.update()
@@ -223,11 +227,7 @@ export class World {
     this.banner.draw(ctx)
     this.dialog.draw(ctx)
 
-    if (this.paused) {
-      ctx.fillStyle = PAUSE_OVERLAY
-      ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
-    }
-
+    this.menu.draw(ctx)
     this.fade.draw(ctx)
   }
 }

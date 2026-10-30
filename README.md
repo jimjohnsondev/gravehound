@@ -26,7 +26,8 @@ Wi-Fi and open the Network URL instead.
 | B | X / K | B | B |
 | Menu | Enter / Esc | Start | MENU |
 
-Right now **B** cycles the light level (a debug feature) and **Menu** pauses.
+Right now **B** cycles the light level (a debug feature) and **Menu** opens the
+menu, with the hero's items and stats.
 Walk through the cottage door to reach the wood's edge.
 
 ## Scripts
