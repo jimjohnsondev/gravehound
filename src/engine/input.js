@@ -60,6 +60,11 @@ export class Input {
     this.keyboard = new Set()
     /** Buttons held down by on-screen controls. */
     this.touch = new Set()
+    /**
+     * Keyboard and touch buttons that went down since the last update step.
+     * A quick tap can go down and up between steps, so `held` would never see it.
+     */
+    this.wentDown = new Set()
 
     /** Combined state for this update step. */
     this.held = new Set()
@@ -71,6 +76,7 @@ export class Input {
       if (!button) return
       event.preventDefault()
       this.keyboard.add(button)
+      this.wentDown.add(button)
     })
     window.addEventListener('keyup', (event) => {
       const button = KEY_BINDINGS[event.code]
@@ -98,6 +104,7 @@ export class Input {
         event.preventDefault()
         buttonElement.setPointerCapture(event.pointerId)
         this.touch.add(button)
+        this.wentDown.add(button)
         buttonElement.classList.add('pressed')
       }
       const release = () => {
@@ -136,7 +143,10 @@ export class Input {
       // Angle in 45-degree slices: 0 = right, 2 = down, 4 = left, 6 = up.
       const slice = Math.round(Math.atan2(y, x) / (Math.PI / 4)) & 7
       const pressed = DPAD_SLICES[slice]
-      for (const button of pressed) this.touch.add(button)
+      for (const button of pressed) {
+        this.touch.add(button)
+        this.wentDown.add(button)
+      }
       dpad.dataset.dir = pressed.join(' ')
     }
 
@@ -173,7 +183,9 @@ export class Input {
   update() {
     const previous = this.held
     this.held = new Set([...this.keyboard, ...this.touch, ...this.#readGamepad()])
-    this.pressed = new Set([...this.held].filter((b) => !previous.has(b)))
+    // Skipping buttons already held also ignores the keyboard's auto-repeat.
+    this.pressed = new Set([...this.held, ...this.wentDown].filter((b) => !previous.has(b)))
+    this.wentDown.clear()
   }
 
   /** @param {Button} button  True while the button is down. */

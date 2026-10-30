@@ -106,7 +106,7 @@ export class World {
     this.ash.placeAt({
       x: this.hero.center.x + behind.x * TILE_SIZE,
       y: this.hero.center.y + behind.y * TILE_SIZE,
-    })
+    }, this.hero.center)
     this.camera.follow(definition.mode, this.tileMap, this.hero.center)
     this.banner.show(definition.name)
     this.#startStoryScene(cameFrom)

@@ -37,11 +37,21 @@ export class Ash {
   /**
    * Jump straight to a spot (used when entering a map).
    * @param {{x: number, y: number}} point
+   * @param {{x: number, y: number}} heroCenter  Where the hero is standing.
    */
-  placeAt(point) {
+  placeAt(point, heroCenter) {
     this.x = point.x
     this.y = point.y
+    // Start with a full trail leading to the hero, so Ash walks up to where the
+    // hero stood instead of waiting and then jumping there.
     this.trail = []
+    for (let step = 1; step <= FOLLOW_DELAY; step++) {
+      const progress = step / FOLLOW_DELAY
+      this.trail.push({
+        x: point.x + (heroCenter.x - point.x) * progress,
+        y: point.y + (heroCenter.y - point.y) * progress,
+      })
+    }
   }
 
   /** @param {import('./hero.js').Hero} hero */

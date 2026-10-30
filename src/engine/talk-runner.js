@@ -68,9 +68,10 @@ export class Conversation {
       const step = this.steps[this.index++]
 
       if (step.type === 'menu') {
+        // Filter first: a choice's own [if picked ...] is about the menu before.
+        this.offered = step.options.filter((option) => this.#holds(option.condition))
         // A new menu: earlier picks no longer count, even if it's skipped.
         this.picked = null
-        this.offered = step.options.filter((option) => this.#holds(option.condition))
         if (this.offered.length === 0) continue
         return { type: 'menu', choices: this.offered.map((option) => this.fillIn(option.text)) }
       }
