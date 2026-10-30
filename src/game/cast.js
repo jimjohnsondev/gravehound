@@ -1,6 +1,3 @@
-import { CHARACTER_COLORS as C } from '../engine/palette.js'
-import { paintPortraits } from './portraits.js'
-
 /**
  * Everyone who can speak in a .talk file, by the id written in capitals
  * (`WREN: ...`), with the expressions their portraits have.
@@ -8,6 +5,8 @@ import { paintPortraits } from './portraits.js'
  * Every speaker needs 'neutral', which is how they start each scene.
  * Add expressions here before using them in dialog.
  */
+import { CHARACTER_COLORS as C } from '../engine/palette.js'
+import { paintPortraits } from './portraits.js'
 
 /**
  * @typedef {object} CastMember
@@ -35,14 +34,10 @@ export const CAST = {
  * @returns {Record<string, import('../engine/dialog-box.js').Speaker>}
  */
 export function createSpeakers() {
-  return Object.fromEntries(
-    Object.entries(CAST).map(([id, member]) => [
-      id,
-      {
-        name: member.name,
-        expressions: member.expressions,
-        portraits: paintPortraits(member.look, member.expressions),
-      },
-    ]),
-  )
+  /** @type {Record<string, import('../engine/dialog-box.js').Speaker>} */
+  const speakers = {}
+  for (const [id, { name, expressions, look }] of Object.entries(CAST)) {
+    speakers[id] = { name, expressions, portraits: paintPortraits(look, expressions) }
+  }
+  return speakers
 }

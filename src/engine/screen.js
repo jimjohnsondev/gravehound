@@ -1,12 +1,13 @@
+/**
+ * The <canvas> the game draws on, scaled to fit the page.
+ */
 import { SCREEN_WIDTH, SCREEN_HEIGHT } from './config.js'
 
 /**
- * Owns the <canvas> the game draws on.
- *
- * The canvas always has 320x192 real pixels. We only change its *displayed*
- * size, scaling by whole numbers (2x, 3x, ...) so every game pixel becomes an
- * even square. On small phones where 2x won't fit we fall back to "fit the
- * space", which can make a few pixels a little uneven but fills the screen.
+ * The canvas always has 320x192 real pixels. Only its displayed size changes,
+ * by whole numbers (2x, 3x, ...) so every game pixel is an even square. Small
+ * phones where 2x won't fit use the exact fit instead, which can make a few
+ * pixels uneven but fills the screen.
  */
 export class Screen {
   /**

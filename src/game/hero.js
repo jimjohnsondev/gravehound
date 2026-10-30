@@ -5,6 +5,7 @@
  * The sprite is drawn taller than the box, so the head can overlap walls and
  * trees above, which is what makes a 3/4 top-down view look right.
  */
+import { TILE_SIZE } from '../engine/config.js'
 
 /** Pixels moved per update step (60 steps a second). */
 const WALK_SPEED = 1.25
@@ -19,6 +20,7 @@ const STEPS_PER_FRAME = 8
 const FEET_WIDTH = 10
 const FEET_HEIGHT = 6
 
+/** The hero: moves with the d-pad and slides along walls. */
 export class Hero {
   /** @param {import('../engine/sprite.js').SpriteSheet} sprites */
   constructor(sprites) {
@@ -38,15 +40,19 @@ export class Hero {
     return { x: this.x + this.width / 2, y: this.y + this.height / 2 }
   }
 
+  /** Where the hero's feet touch the ground. Lower on screen means nearer. */
+  get depth() {
+    return this.y + this.height
+  }
+
   /**
    * Put the hero's feet in the middle of a tile.
    * @param {number} tileX
    * @param {number} tileY
-   * @param {number} tileSize
    */
-  placeOnTile(tileX, tileY, tileSize) {
-    this.x = tileX * tileSize + (tileSize - this.width) / 2
-    this.y = tileY * tileSize + (tileSize - this.height) / 2
+  placeOnTile(tileX, tileY) {
+    this.x = tileX * TILE_SIZE + (TILE_SIZE - this.width) / 2
+    this.y = tileY * TILE_SIZE + (TILE_SIZE - this.height) / 2
   }
 
   /**
@@ -87,9 +93,8 @@ export class Hero {
    */
   draw(ctx, camera) {
     const frame = Math.floor(this.walkTimer / STEPS_PER_FRAME) % 2
-    const { x, y } = this.center
     // Feet of the sprite line up with the bottom of the feet box.
-    const left = x - this.sprites.frameWidth / 2 - camera.x
+    const left = this.center.x - this.sprites.frameWidth / 2 - camera.x
     const top = this.y + this.height - this.sprites.frameHeight - camera.y
     this.sprites.draw(ctx, this.facing, frame, left, top)
   }

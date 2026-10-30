@@ -53,6 +53,7 @@ const DPAD_SLICES = [
 /** Analog stick must be pushed this far to count as a direction. */
 const STICK_DEAD_ZONE = 0.4
 
+/** The current state of the game's buttons. Call `update()` once per update step. */
 export class Input {
   constructor() {
     /** Buttons held down by the keyboard. */

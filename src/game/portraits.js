@@ -1,12 +1,13 @@
-import { PORTRAIT_HEIGHT, PORTRAIT_WIDTH } from '../engine/config.js'
-import { CHARACTER_COLORS as C } from '../engine/palette.js'
-
 /**
  * PLACEHOLDER dialog portraits, drawn with code: a head and shoulders with a
  * face that changes with the expression. Replace with imported portrait
  * sheets in the same layout (one picture per expression, side by side, in the
  * order the cast lists them).
  */
+import { PORTRAIT_HEIGHT, PORTRAIT_WIDTH } from '../engine/config.js'
+import { CHARACTER_COLORS as C } from '../engine/palette.js'
+
+/** @typedef {(x: number, y: number, w: number, h: number, color: string) => void} RectPainter */
 
 /**
  * @typedef {object} PortraitLook
@@ -40,6 +41,21 @@ const EYE_Y = 38
 const BROW_Y = 34
 const MOUTH_Y = 51
 
+/** Width of an eye. Brows are mirrored around its centre. */
+const EYE_WIDTH = 3
+
+/**
+ * Each brow shape as pieces of the left brow: [x offset from the eye,
+ * y offset from BROW_Y, width]. The right brow is the mirror image.
+ * @type {Record<Face['brows'], [number, number, number][]>}
+ */
+const BROW_PIECES = {
+  level: [[-1, 0, 5]],
+  raised: [[-1, -2, 5]],
+  worried: [[-1, 1, 2], [1, 0, 3]], // inner ends up
+  angry: [[-1, 0, 2], [1, 1, 3]], // inner ends down
+}
+
 /**
  * Paint one portrait per expression into a strip, left to right.
  * @param {PortraitLook} look
@@ -56,7 +72,7 @@ export function paintPortraits(look, expressions) {
     const face = FACES[expression]
     if (!face) throw new Error(`No placeholder face for the expression "${expression}"`)
     const offsetX = column * PORTRAIT_WIDTH
-    /** @type {(x: number, y: number, w: number, h: number, color: string) => void} */
+    /** @type {RectPainter} */
     const rect = (x, y, w, h, color) => {
       ctx.fillStyle = color
       ctx.fillRect(offsetX + x, y, w, h)
@@ -70,7 +86,7 @@ export function paintPortraits(look, expressions) {
 /**
  * Shoulders, neck, head and hair. Every shape gets a dark outline so the
  * portrait stands out against any background.
- * @param {(x: number, y: number, w: number, h: number, color: string) => void} rect
+ * @param {RectPainter} rect
  * @param {PortraitLook} look
  */
 function paintBust(rect, look) {
@@ -102,7 +118,7 @@ function paintBust(rect, look) {
 }
 
 /**
- * @param {(x: number, y: number, w: number, h: number, color: string) => void} rect
+ * @param {RectPainter} rect
  * @param {Face} face
  */
 function paintFace(rect, face) {
@@ -124,25 +140,10 @@ function paintFace(rect, face) {
     }
   }
 
-  // Brows are drawn for the left eye; `mirror` flips the shape for the right.
-  /** @type {[number, boolean][]} */
-  const eyes = [[LEFT_EYE_X, false], [RIGHT_EYE_X, true]]
-  for (const [eyeX, mirror] of eyes) {
-    const brow = (/** @type {number} */ x, /** @type {number} */ y, /** @type {number} */ w) =>
-      rect(mirror ? eyeX + 3 - (x - eyeX) - w : x, y, w, 1, dark)
-    if (face.brows === 'level') {
-      brow(eyeX - 1, BROW_Y, 5)
-    } else if (face.brows === 'raised') {
-      brow(eyeX - 1, BROW_Y - 2, 5)
-    } else if (face.brows === 'worried') {
-      // Inner ends up.
-      brow(eyeX - 1, BROW_Y + 1, 2)
-      brow(eyeX + 1, BROW_Y, 3)
-    } else {
-      // Inner ends down.
-      brow(eyeX - 1, BROW_Y, 2)
-      brow(eyeX + 1, BROW_Y + 1, 3)
-    }
+  for (const [offsetX, offsetY, width] of BROW_PIECES[face.brows]) {
+    const mirroredOffsetX = EYE_WIDTH - offsetX - width
+    rect(LEFT_EYE_X + offsetX, BROW_Y + offsetY, width, 1, dark)
+    rect(RIGHT_EYE_X + mirroredOffsetX, BROW_Y + offsetY, width, 1, dark)
   }
 
   if (face.mouth === 'flat') {

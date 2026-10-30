@@ -1,9 +1,11 @@
-import { UI_COLORS } from './palette.js'
-
 /**
- * The game's standard panel: a dark box with a 1-pixel border. Banners, the
+ * The game's standard panel: a dark box with a thin border. Banners, the
  * dialog box and menus all sit on one, so they look like they belong together.
  */
+import { UI_COLORS } from './palette.js'
+
+/** Thickness of a panel's border in pixels. */
+export const PANEL_BORDER = 1
 
 /**
  * @param {CanvasRenderingContext2D} ctx
@@ -16,5 +18,10 @@ export function drawPanel(ctx, x, y, width, height) {
   ctx.fillStyle = UI_COLORS.panelBorder
   ctx.fillRect(x, y, width, height)
   ctx.fillStyle = UI_COLORS.panel
-  ctx.fillRect(x + 1, y + 1, width - 2, height - 2)
+  ctx.fillRect(
+    x + PANEL_BORDER,
+    y + PANEL_BORDER,
+    width - PANEL_BORDER * 2,
+    height - PANEL_BORDER * 2,
+  )
 }

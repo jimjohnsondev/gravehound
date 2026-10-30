@@ -1,8 +1,12 @@
+/**
+ * The game world while playing: the current map, the characters in it, moving
+ * between maps, and starting dialog scenes.
+ */
 import { TILE_SIZE } from '../engine/config.js'
 import { Camera } from '../engine/camera.js'
 import { DialogBox } from '../engine/dialog-box.js'
 import { Fade } from '../engine/fade.js'
-import { MAX_LIGHT_LEVEL } from '../engine/palette.js'
+import { MAX_LIGHT_LEVEL, UI_COLORS } from '../engine/palette.js'
 import { StoryState } from '../engine/story-state.js'
 import { Conversation } from '../engine/talk-runner.js'
 import { TileMap } from '../engine/tilemap.js'
@@ -14,6 +18,9 @@ import { TALK_ACTIONS } from './talk-actions.js'
 
 /** PLACEHOLDER until there's a title screen where the player names the hero. */
 const PLACEHOLDER_HERO_NAME = 'Rowan'
+
+/** Laid over the whole screen while the game is paused. */
+const PAUSE_OVERLAY = 'rgba(0, 0, 0, 0.5)'
 
 /**
  * @typedef {object} MapExit
@@ -44,10 +51,7 @@ const BEHIND = {
   right: { x: -1, y: 0 },
 }
 
-/**
- * The game world: the current map, the characters in it, and moving between
- * maps. This is the "playing" state of the game.
- */
+/** Everything in play. Call `enterMap` once before the first update or draw. */
 export class World {
   /**
    * @param {object} options
@@ -72,9 +76,10 @@ export class World {
     this.story = new StoryState(STATS)
     this.heroName = PLACEHOLDER_HERO_NAME
 
-    /** @type {MapDefinition} */
-    this.mapDefinition = maps[Object.keys(maps)[0]]
-    this.tileMap = new TileMap(this.mapDefinition.rows)
+    /** @type {MapDefinition | null} */
+    this.mapDefinition = null
+    /** @type {TileMap | null} */
+    this.tileMap = null
     this.lightLevel = 0
     this.paused = false
   }
@@ -90,12 +95,12 @@ export class World {
     const definition = this.maps[mapId]
     if (!definition) throw new Error(`No map called "${mapId}"`)
 
-    const cameFrom = this.mapDefinition.id
+    const cameFrom = this.mapDefinition?.id
     this.mapDefinition = definition
     this.tileMap = new TileMap(definition.rows)
     this.lightLevel = definition.lightLevel
 
-    this.hero.placeOnTile(tileX, tileY, TILE_SIZE)
+    this.hero.placeOnTile(tileX, tileY)
     this.hero.facing = facing
     const behind = BEHIND[facing]
     this.ash.placeAt({
@@ -104,11 +109,16 @@ export class World {
     })
     this.camera.follow(definition.mode, this.tileMap, this.hero.center)
     this.banner.show(definition.name)
+    this.#startStoryScene(cameFrom)
+  }
 
-    // The birthday supper plays when the hero brings the kindling home.
-    if (mapId === 'cottage' && cameFrom === 'woodEdge' && !this.story.isSet('supper_done')) {
-      this.talk('supper')
-    }
+  /**
+   * Play a scene if arriving on this map is a story beat.
+   * @param {string | undefined} cameFrom  Id of the map just left.
+   */
+  #startStoryScene(cameFrom) {
+    const broughtKindlingHome = this.mapDefinition.id === 'cottage' && cameFrom === 'woodEdge'
+    if (broughtKindlingHome && !this.story.isSet('supper_done')) this.talk('supper')
   }
 
   /**
@@ -140,8 +150,7 @@ export class World {
     if (input.wasPressed('menu')) this.paused = !this.paused
     if (this.paused) return
 
-    // The banner's clock only runs once the fade-in is over and play has
-    // started, so it's always fully seen.
+    // Counted only during play, so the banner is never used up behind a fade.
     this.banner.update()
 
     // DEBUG: B cycles the light level so you can see the lighting system.
@@ -167,23 +176,20 @@ export class World {
 
   /** @param {CanvasRenderingContext2D} ctx */
   draw(ctx) {
-    ctx.fillStyle = '#0b0a12'
+    ctx.fillStyle = UI_COLORS.backdrop
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
 
     this.tileMap.draw(ctx, this.tileset, this.camera, this.lightLevel)
 
-    // Draw characters from back to front so nearer ones overlap farther ones.
-    const characters = [
-      { depth: this.ash.y + 3, draw: () => this.ash.draw(ctx, this.camera) },
-      { depth: this.hero.y + this.hero.height, draw: () => this.hero.draw(ctx, this.camera) },
-    ]
-    characters.sort((a, b) => a.depth - b.depth).forEach((c) => c.draw())
+    // Draw from back to front so nearer characters overlap farther ones.
+    const characters = [this.ash, this.hero].sort((a, b) => a.depth - b.depth)
+    for (const character of characters) character.draw(ctx, this.camera)
 
     this.banner.draw(ctx)
     this.dialog.draw(ctx)
 
     if (this.paused) {
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'
+      ctx.fillStyle = PAUSE_OVERLAY
       ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
     }
 

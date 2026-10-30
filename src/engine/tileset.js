@@ -1,3 +1,7 @@
+/**
+ * Tile graphics. Each tile type is painted once per light level and kept, so
+ * maps draw quickly by copying finished squares.
+ */
 import { TILE_SIZE } from './config.js'
 import { backgroundColor } from './palette.js'
 
@@ -18,12 +22,8 @@ import { backgroundColor } from './palette.js'
  */
 
 /**
- * Draws every tile type once per light level and keeps the result, so the map
- * can be drawn quickly by copying finished 16x16 squares.
- *
- * Today the tiles are painted by code (placeholder art). When real art comes
- * through the import pipeline, only this class needs to learn to load images;
- * maps and game code stay the same.
+ * The set of tile types and their cached pictures. Tiles are painted by code
+ * as placeholder art. For imported art, only this class has to change.
  */
 export class TileSet {
   /** @param {Record<string, TileType>} types  Tile types keyed by map character. */
@@ -54,7 +54,7 @@ export class TileSet {
     ctx.drawImage(sheet, index * TILE_SIZE, 0, TILE_SIZE, TILE_SIZE, x, y, TILE_SIZE, TILE_SIZE)
   }
 
-  /** Paint all tiles at a light level into one strip, the first time it's needed. */
+  /** All tiles at one light level in a single strip, painted on first use. */
   #sheetFor(lightLevel) {
     const cached = this.sheets.get(lightLevel)
     if (cached) return cached
@@ -88,12 +88,11 @@ export class TileSet {
 
 /**
  * A tiny repeatable random number generator (mulberry32). The same seed always
- * gives the same numbers, so tiles look identical at every light level and
- * story seeds can shuffle side details reproducibly.
+ * gives the same numbers, so a tile looks identical at every light level.
  * @param {number} seed
  * @returns {() => number}  Function returning numbers from 0 up to 1.
  */
-export function seededRandom(seed) {
+function seededRandom(seed) {
   let state = seed >>> 0
   return function next() {
     state = (state + 0x6d2b79f5) >>> 0

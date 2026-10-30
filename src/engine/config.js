@@ -12,10 +12,6 @@ export const SCREEN_HEIGHT = 192
 /** Size of one map tile in pixels. The screen is 20 x 12 tiles. */
 export const TILE_SIZE = 16
 
-/** Screen size measured in tiles. A single-screen map is exactly this big. */
-export const SCREEN_TILES_WIDE = SCREEN_WIDTH / TILE_SIZE
-export const SCREEN_TILES_HIGH = SCREEN_HEIGHT / TILE_SIZE
-
 /** Size of a character portrait in the dialog box, in pixels. */
 export const PORTRAIT_WIDTH = 72
 export const PORTRAIT_HEIGHT = 96

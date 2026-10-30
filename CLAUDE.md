@@ -75,7 +75,8 @@ src/
   engine/            reusable machinery: screen, loop, input, palette,
                      tileset, tilemap, camera, sprite, fade,
                      font-glyphs (the pixel font as data), text, panel,
-                     talk-parser, talk-runner, story-state, dialog-box
+                     talk-parser, talk-checker, talk-runner, story-state,
+                     dialog-box
   game/              Gravehound itself: world, hero, ash, tiles, sprites,
                      map-banner, cast, portraits, backgrounds, story-flags,
                      talk-actions

@@ -1,4 +1,13 @@
+/**
+ * A map's grid of tiles: what's where, what's solid, and drawing what's in view.
+ */
 import { TILE_SIZE, SCREEN_WIDTH, SCREEN_HEIGHT } from './config.js'
+
+/**
+ * Stops a box that ends exactly on a tile's edge from counting as inside the
+ * next tile, so the hero can walk flush against a wall.
+ */
+const EDGE_NUDGE = 0.001
 
 /**
  * A grid of tiles, written as rows of characters so maps are easy to read
@@ -44,9 +53,9 @@ export class TileMap {
    */
   overlapsSolid(tileset, box) {
     const left = Math.floor(box.x / TILE_SIZE)
-    const right = Math.floor((box.x + box.width - 0.001) / TILE_SIZE)
+    const right = Math.floor((box.x + box.width - EDGE_NUDGE) / TILE_SIZE)
     const top = Math.floor(box.y / TILE_SIZE)
-    const bottom = Math.floor((box.y + box.height - 0.001) / TILE_SIZE)
+    const bottom = Math.floor((box.y + box.height - EDGE_NUDGE) / TILE_SIZE)
 
     for (let tileY = top; tileY <= bottom; tileY++) {
       for (let tileX = left; tileX <= right; tileX++) {

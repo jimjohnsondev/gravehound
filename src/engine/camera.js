@@ -1,14 +1,11 @@
+/**
+ * Decides which part of the map is on screen. There are two kinds of map:
+ * - 'screen': a single still screen. The camera never moves.
+ * - 'scroll': a larger map. The camera follows a target and stops at the edges.
+ */
 import { SCREEN_WIDTH, SCREEN_HEIGHT } from './config.js'
 
-/**
- * Decides which part of the map is on screen.
- *
- * Two kinds of map, chosen per story beat:
- * - 'screen': a single still screen (20 x 12 tiles). The camera never moves.
- *   Smaller maps are centred.
- * - 'scroll': a larger map. The camera follows a target and stops at the
- *   map edges, scrolling in any direction.
- */
+/** Top-left of the view, in map pixels. */
 export class Camera {
   constructor() {
     this.x = 0
@@ -22,8 +19,8 @@ export class Camera {
    */
   follow(mode, map, target) {
     if (mode === 'screen') {
-      this.x = Math.floor((map.widthInPixels - SCREEN_WIDTH) / 2)
-      this.y = Math.floor((map.heightInPixels - SCREEN_HEIGHT) / 2)
+      this.x = centred(map.widthInPixels, SCREEN_WIDTH)
+      this.y = centred(map.heightInPixels, SCREEN_HEIGHT)
       return
     }
     this.x = clampAxis(target.x - SCREEN_WIDTH / 2, map.widthInPixels, SCREEN_WIDTH)
@@ -32,13 +29,22 @@ export class Camera {
 }
 
 /**
- * Keep the view inside the map. If the map is smaller than the screen on this
- * axis, centre it instead. Rounded to whole pixels so art never blurs.
+ * The view position that puts the map in the middle of the screen.
+ * @param {number} mapSize
+ * @param {number} screenSize
+ */
+function centred(mapSize, screenSize) {
+  return Math.floor((mapSize - screenSize) / 2)
+}
+
+/**
+ * Keep the view inside the map, or centre a map smaller than the screen.
+ * Rounded to whole pixels so art never blurs.
  * @param {number} wanted
  * @param {number} mapSize
  * @param {number} screenSize
  */
 function clampAxis(wanted, mapSize, screenSize) {
-  if (mapSize <= screenSize) return Math.floor((mapSize - screenSize) / 2)
+  if (mapSize <= screenSize) return centred(mapSize, screenSize)
   return Math.round(Math.max(0, Math.min(wanted, mapSize - screenSize)))
 }

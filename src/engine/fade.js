@@ -1,3 +1,6 @@
+/**
+ * Screen fades: everything, characters included, to black and back.
+ */
 import { SCREEN_WIDTH, SCREEN_HEIGHT } from './config.js'
 
 /** Fades use a few hard steps rather than a smooth blend, for the 8-bit feel. */
@@ -7,9 +10,7 @@ const FADE_STEPS = [0, 0.25, 0.5, 0.75, 1]
 const STEP_DURATION = 5
 
 /**
- * Fades the whole picture, characters included, to black and back.
- *
- * Usage:
+ * Runs one fade at a time. Usage:
  *   fade.out(() => { changeMap() })   // goes black, runs the callback, fades back in
  */
 export class Fade {

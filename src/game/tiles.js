@@ -9,6 +9,16 @@
  * lighting system can darken them. See engine/palette.js.
  */
 
+/**
+ * Colour one random pixel of a tile, for speckled ground.
+ * @param {import('../engine/tileset.js').TilePainter} p
+ * @param {string} ramp
+ * @param {number} step
+ */
+function speckle(p, ramp, step) {
+  p.pixel(Math.floor(p.random() * 16), Math.floor(p.random() * 16), ramp, step)
+}
+
 /** @type {Record<string, import('../engine/tileset.js').TileType>} */
 export const TILE_TYPES = {
   '.': {
@@ -17,8 +27,8 @@ export const TILE_TYPES = {
     paint(p) {
       p.rect(0, 0, 16, 16, 'grass', 1)
       for (let i = 0; i < 10; i++) {
-        p.pixel(Math.floor(p.random() * 16), Math.floor(p.random() * 16), 'grass', 0)
-        p.pixel(Math.floor(p.random() * 16), Math.floor(p.random() * 16), 'grass', 2)
+        speckle(p, 'grass', 0)
+        speckle(p, 'grass', 2)
       }
     },
   },
@@ -43,8 +53,8 @@ export const TILE_TYPES = {
     paint(p) {
       p.rect(0, 0, 16, 16, 'earth', 1)
       for (let i = 0; i < 8; i++) {
-        p.pixel(Math.floor(p.random() * 16), Math.floor(p.random() * 16), 'earth', 2)
-        p.pixel(Math.floor(p.random() * 16), Math.floor(p.random() * 16), 'earth', 0)
+        speckle(p, 'earth', 2)
+        speckle(p, 'earth', 0)
       }
     },
   },

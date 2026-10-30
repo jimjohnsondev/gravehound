@@ -1,13 +1,9 @@
-import { DEFAULT_EXPRESSION } from './talk-parser.js'
-
 /**
  * Plays one dialog scene, one step at a time, without drawing anything.
- *
- * The dialog box asks `next()` for the next thing to show, and calls
- * `choose()` when the player picks from a menu. Steps whose [if ...] doesn't
- * hold are skipped, and [set], [give], [do] and [background] happen as they
- * are reached, so the dialog box only ever sees lines and menus.
+ * The dialog box only ever sees lines and menus: steps whose [if ...] fails are
+ * skipped here, and [set], [give], [do] and [background] happen here too.
  */
+import { DEFAULT_EXPRESSION, TEXT_VALUE } from './talk-parser.js'
 
 /**
  * @typedef {object} ShownLine
@@ -28,9 +24,10 @@ import { DEFAULT_EXPRESSION } from './talk-parser.js'
  * How a conversation reaches the rest of the game.
  * @property {(action: string) => void} act               Runs [do action].
  * @property {(background: string) => void} setBackground  Runs [background name].
- * @property {Record<string, string>} textValues           Fills in {hero} and friends.
+ * @property {Record<string, string>} textValues           Values for {names} in text.
  */
 
+/** One scene being played. Ask `next()` for what to show, and `choose()` a menu option. */
 export class Conversation {
   /**
    * @param {string} sceneName
@@ -117,7 +114,7 @@ export class Conversation {
    * @param {string} text
    */
   fillIn(text) {
-    return text.replace(/\{([a-z_]+)\}/g, (whole, name) => this.hooks.textValues[name] ?? whole)
+    return text.replace(TEXT_VALUE, (whole, name) => this.hooks.textValues[name] ?? whole)
   }
 
   /**
@@ -135,10 +132,20 @@ export class Conversation {
 
   /** @param {import('./talk-parser.js').Change} change */
   #apply({ name, how, amount }) {
-    if (how === 'on') this.story.set(name, true)
-    else if (how === 'off') this.story.set(name, false)
-    else if (how === 'add') this.story.setNumber(name, this.story.getNumber(name) + amount)
-    else this.story.setNumber(name, amount)
+    switch (how) {
+      case 'on':
+        this.story.set(name, true)
+        break
+      case 'off':
+        this.story.set(name, false)
+        break
+      case 'add':
+        this.story.setNumber(name, this.story.getNumber(name) + amount)
+        break
+      case 'assign':
+        this.story.setNumber(name, amount)
+        break
+    }
   }
 
   /**
@@ -146,11 +153,18 @@ export class Conversation {
    * @returns {boolean} true when every check holds
    */
   #holds(condition) {
-    return condition.every((check) => this.#checkHolds(check) !== check.negated)
+    return condition.every((check) => {
+      const result = this.#evaluate(check)
+      if (check.negated) return !result
+      return result
+    })
   }
 
-  /** @param {import('./talk-parser.js').Check} check */
-  #checkHolds(check) {
+  /**
+   * The answer to a check, ignoring any "not".
+   * @param {import('./talk-parser.js').Check} check
+   */
+  #evaluate(check) {
     switch (check.type) {
       case 'flag':
         return this.story.isSet(check.name)

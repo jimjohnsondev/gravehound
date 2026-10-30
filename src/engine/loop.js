@@ -1,3 +1,6 @@
+/**
+ * The main loop: fixed-rate game logic, and drawing once per display frame.
+ */
 import { UPDATES_PER_SECOND } from './config.js'
 
 const STEP_MS = 1000 / UPDATES_PER_SECOND
@@ -6,11 +9,9 @@ const STEP_MS = 1000 / UPDATES_PER_SECOND
 const MAX_CATCH_UP_MS = 250
 
 /**
- * The main loop.
- *
- * `update` runs at a fixed 60 times a second so movement and timing feel the
- * same on a 60Hz phone and a 144Hz monitor. `draw` runs once per display
- * frame. Game code should change state only in update and only read it in draw.
+ * Start the loop. `update` runs a fixed 60 times a second so the game feels
+ * the same on a 60Hz phone and a 144Hz monitor. Change state only in `update`
+ * and only read it in `draw`.
  *
  * @param {object} callbacks
  * @param {() => void} callbacks.update  One fixed step of game logic.

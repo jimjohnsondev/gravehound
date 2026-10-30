@@ -11,6 +11,7 @@
 /** Row order in a character sprite sheet. @type {Facing[]} */
 export const FACINGS = ['down', 'up', 'left', 'right']
 
+/** One image holding all of a character's frames. */
 export class SpriteSheet {
   /**
    * @param {CanvasImageSource} image

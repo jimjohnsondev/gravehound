@@ -1,12 +1,10 @@
-import { FALLBACK_CHARACTER, GLYPHS, GLYPH_HEIGHT, LETTER_SPACING } from './font-glyphs.js'
-
 /**
  * Draws text in the pixel font from font-glyphs.js.
  *
- * The first time a colour is used, every glyph is painted once in that colour
- * into a strip, and the strip is kept. Drawing text after that is just copying
- * small rectangles out of the strip, the same trick TileSet uses for tiles.
+ * Every glyph is painted once per colour into a strip, the first time that
+ * colour is used. Drawing text then just copies small rectangles from the strip.
  */
+import { FALLBACK_CHARACTER, GLYPHS, GLYPH_HEIGHT, LETTER_SPACING } from './font-glyphs.js'
 
 /**
  * @typedef {object} GlyphSlot
@@ -15,11 +13,8 @@ import { FALLBACK_CHARACTER, GLYPHS, GLYPH_HEIGHT, LETTER_SPACING } from './font
  * @property {number} width  Glyph width in pixels.
  */
 
-/** Where each character's glyph sits in a strip, worked out once at start-up. */
-const SLOTS = layOutGlyphs()
-
-/** Total width of a strip holding every glyph. */
-const STRIP_WIDTH = [...SLOTS.values()].reduce((sum, slot) => sum + slot.width, 0)
+/** Where each character's glyph sits in a strip, and the whole strip's width. */
+const { slots: SLOTS, stripWidth: STRIP_WIDTH } = layOutGlyphs()
 
 /**
  * Painted strips, one per colour, made the first time each colour is used.
@@ -90,7 +85,7 @@ function slotFor(character) {
 /**
  * Check every glyph's shape and give each one a place in the strip.
  * Mistakes in the font data are caught here, at start-up, with a clear message.
- * @returns {Map<string, GlyphSlot>}
+ * @returns {{slots: Map<string, GlyphSlot>, stripWidth: number}}
  */
 function layOutGlyphs() {
   /** @type {Map<string, GlyphSlot>} */
@@ -110,7 +105,7 @@ function layOutGlyphs() {
   if (!slots.has(FALLBACK_CHARACTER)) {
     throw new Error(`The font needs a glyph for the fallback character "${FALLBACK_CHARACTER}"`)
   }
-  return slots
+  return { slots, stripWidth: x }
 }
 
 /**

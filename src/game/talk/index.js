@@ -1,14 +1,14 @@
-import { checkTalk, parseTalkFiles } from '../../engine/talk-parser.js'
+/**
+ * Loads every .talk dialog file and checks it against the names the game
+ * declares: cast, flags, items, actions and backgrounds.
+ */
+import { checkTalk } from '../../engine/talk-checker.js'
+import { parseTalkFiles } from '../../engine/talk-parser.js'
 import { BACKGROUND_NAMES } from '../backgrounds.js'
 import { CAST } from '../cast.js'
 import { COUNTERS, FLAGS, ITEMS, STATS } from '../story-flags.js'
 import { TALK_ACTIONS } from '../talk-actions.js'
 import cottage from './cottage.talk?raw'
-
-/**
- * Loads every .talk dialog file and checks it against the names the game
- * declares (cast, flags, items, actions, backgrounds).
- */
 
 /** Every .talk file in the game, by file name. Add new ones here. */
 const TALK_FILES = {
@@ -21,9 +21,13 @@ const TALK_FILES = {
  * @returns {import('../../engine/talk-parser.js').Scenes}
  */
 export function loadScenes() {
+  /** @type {Record<string, string[]>} */
+  const speakers = {}
+  for (const [id, member] of Object.entries(CAST)) speakers[id] = member.expressions
+
   const scenes = parseTalkFiles(TALK_FILES)
   checkTalk(scenes, {
-    speakers: Object.fromEntries(Object.entries(CAST).map(([id, member]) => [id, member.expressions])),
+    speakers,
     flags: Object.keys(FLAGS),
     counters: Object.keys(COUNTERS),
     stats: Object.keys(STATS),

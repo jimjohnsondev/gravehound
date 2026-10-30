@@ -51,5 +51,5 @@ startLoop({
   },
 })
 
-// Handy in the browser console while developing: `gravehound.world.lightLevel = 3`
+// For the browser console while developing, e.g. `gravehound.world.lightLevel = 3`
 Object.assign(window, { gravehound: { world, input } })

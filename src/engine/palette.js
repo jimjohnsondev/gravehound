@@ -30,8 +30,6 @@ export const RAMPS = {
   cloth: ['#a04050', '#7e2f40', '#5c2333', '#3e1a27', '#27131c', '#170d13', '#0b0a12'],
 }
 
-/** Name of a ramp in RAMPS. @typedef {keyof typeof RAMPS} RampName */
-
 /**
  * Look up a background colour with lighting applied.
  * @param {string} ramp       Name of the ramp, e.g. 'grass'.
@@ -69,6 +67,8 @@ export const CHARACTER_COLORS = {
  * readable in the darkest places.
  */
 export const UI_COLORS = {
+  /** Behind everything, wherever a map doesn't fill the screen. */
+  backdrop: '#0b0a12',
   text: '#f2e8d0',
   /** Menu choices that aren't selected. */
   textDim: '#8d86a6',

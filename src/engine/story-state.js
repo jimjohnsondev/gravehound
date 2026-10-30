@@ -1,10 +1,10 @@
 /**
- * The story so far: which flags are on, the values of counters and stats,
- * the items the hero carries, and which dialog scenes have been played.
- *
- * Dialog reads and changes this, and so does game code when story events
- * happen. Saving the game will later just mean saving this.
+ * The story so far: flags, counters and stats, the hero's items, and which
+ * dialog scenes have been played. Dialog and game code both read and change
+ * this, and it's all a save file needs to store.
  */
+
+/** Everything the story remembers. */
 export class StoryState {
   /**
    * @param {Record<string, number>} startingNumbers  Counters and stats that

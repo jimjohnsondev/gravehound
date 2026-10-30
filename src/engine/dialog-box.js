@@ -1,25 +1,20 @@
-import { PORTRAIT_HEIGHT, PORTRAIT_WIDTH, SCREEN_HEIGHT, SCREEN_WIDTH } from './config.js'
-import { GLYPH_HEIGHT } from './font-glyphs.js'
-import { UI_COLORS } from './palette.js'
-import { drawPanel } from './panel.js'
-import { drawText, measureText, wrapText } from './text.js'
-
 /**
  * The dialog box: a large portrait of whoever is speaking, over an
  * environmental background, with their words in a box beside them. Narration
- * has no portrait and uses the full width. So do menus, since it's the player
- * choosing.
- *
- * It shows whatever a Conversation (talk-runner.js) gives it. A turns the
- * page; up, down and A pick a choice.
+ * and menus have no portrait and use the full width.
  */
+import { PORTRAIT_HEIGHT, PORTRAIT_WIDTH, SCREEN_HEIGHT, SCREEN_WIDTH } from './config.js'
+import { GLYPH_HEIGHT } from './font-glyphs.js'
+import { UI_COLORS } from './palette.js'
+import { PANEL_BORDER, drawPanel } from './panel.js'
+import { drawText, measureText, wrapText } from './text.js'
 
 /** Gap between the boxes and the screen edges. */
 const MARGIN = 4
 
-/** Space between a box's 1-pixel border and its text. */
-const PADDING_X = 6
-const PADDING_Y = 5
+/** Distance from the outside of a box to its text. */
+const TEXT_INSET_X = PANEL_BORDER + 6
+const TEXT_INSET_Y = PANEL_BORDER + 5
 
 /** Space above and below the name in the speaker's name tab. */
 const NAME_PADDING_Y = 3
@@ -32,6 +27,12 @@ const LINES_PER_PAGE = 4
 
 /** Room on the left of each choice for the cursor. */
 const CURSOR_SPACE = 8
+
+/** Width of the "press A" arrow. */
+const ARROW_WIDTH = 5
+
+/** Height of the "press A" arrow. */
+const ARROW_HEIGHT = 3
 
 /** Update steps for each half of the "press A" arrow's blink. */
 const BLINK_DURATION = 20
@@ -52,6 +53,7 @@ const BLINK_DURATION = 20
  * @property {number} height
  */
 
+/** Shows a Conversation. A turns the page; up, down and A pick a choice. */
 export class DialogBox {
   /**
    * @param {object} options
@@ -65,6 +67,13 @@ export class DialogBox {
     this.conversation = null
     /** @type {import('./talk-runner.js').ShownLine | import('./talk-runner.js').ShownMenu | null} */
     this.shown = null
+    /**
+     * Who is saying the current line. Null for narration.
+     * @type {Speaker | null}
+     */
+    this.speaker = null
+    /** The speaker's name as shown, with {values} filled in. */
+    this.speakerName = ''
     /**
      * The current line, split into pages of LINES_PER_PAGE lines.
      * @type {string[][]}
@@ -110,7 +119,7 @@ export class DialogBox {
       if (input.wasPressed('up')) this.selected = (this.selected + count - 1) % count
       if (input.wasPressed('down')) this.selected = (this.selected + 1) % count
       if (input.wasPressed('a')) {
-        this.conversation?.choose(this.selected)
+        this.conversation.choose(this.selected)
         this.#advance()
       }
     } else if (input.wasPressed('a')) {
@@ -121,7 +130,7 @@ export class DialogBox {
 
   /** Move on to the conversation's next line or menu, or finish. */
   #advance() {
-    this.shown = this.conversation?.next() ?? null
+    this.shown = this.conversation.next()
     this.timer = 0
 
     if (!this.shown) {
@@ -132,6 +141,12 @@ export class DialogBox {
     if (this.shown.type === 'menu') {
       this.selected = 0
       return
+    }
+
+    this.speaker = null
+    if (this.shown.speaker) {
+      this.speaker = this.speakers[this.shown.speaker]
+      this.speakerName = this.conversation.fillIn(this.speaker.name)
     }
 
     const lines = wrapText(this.shown.text, textWidth(this.#lineBox()))
@@ -149,37 +164,33 @@ export class DialogBox {
 
     if (this.background) ctx.drawImage(this.backgrounds[this.background], 0, 0)
 
-    if (shown.type === 'menu') {
-      this.#drawMenu(ctx, shown.choices)
-      return
-    }
+    if (shown.type === 'menu') this.#drawMenu(ctx, shown.choices)
+    else this.#drawLine(ctx, shown.expression)
+  }
 
+  /**
+   * @param {CanvasRenderingContext2D} ctx
+   * @param {string} expression
+   */
+  #drawLine(ctx, expression) {
     const box = this.#lineBox()
-    const speaker = shown.speaker ? this.speakers[shown.speaker] : null
-    if (speaker) {
-      const column = speaker.expressions.indexOf(shown.expression)
+
+    if (this.speaker) {
+      const column = this.speaker.expressions.indexOf(expression)
       ctx.drawImage(
-        speaker.portraits,
+        this.speaker.portraits,
         column * PORTRAIT_WIDTH, 0, PORTRAIT_WIDTH, PORTRAIT_HEIGHT,
         MARGIN, SCREEN_HEIGHT - MARGIN - PORTRAIT_HEIGHT, PORTRAIT_WIDTH, PORTRAIT_HEIGHT,
       )
-      this.#drawNameTab(ctx, box, this.conversation?.fillIn(speaker.name) ?? speaker.name)
+      drawNameTab(ctx, box, this.speakerName)
     }
 
     drawPanel(ctx, box.x, box.y, box.width, box.height)
     this.pages[this.page].forEach((line, index) => {
-      drawText(ctx, line, box.x + 1 + PADDING_X, box.y + 1 + PADDING_Y + index * LINE_HEIGHT, UI_COLORS.text)
+      drawText(ctx, line, box.x + TEXT_INSET_X, box.y + TEXT_INSET_Y + index * LINE_HEIGHT, UI_COLORS.text)
     })
 
-    // A blinking arrow in the corner says "press A to go on".
-    if (this.timer % (BLINK_DURATION * 2) < BLINK_DURATION) {
-      const x = box.x + box.width - 1 - PADDING_X - 5
-      const y = box.y + box.height - 1 - PADDING_Y - 3
-      ctx.fillStyle = UI_COLORS.text
-      ctx.fillRect(x, y, 5, 1)
-      ctx.fillRect(x + 1, y + 1, 3, 1)
-      ctx.fillRect(x + 2, y + 2, 1, 1)
-    }
+    if (this.timer % (BLINK_DURATION * 2) < BLINK_DURATION) drawArrow(ctx, box)
   }
 
   /**
@@ -190,23 +201,8 @@ export class DialogBox {
   #lineBox() {
     const height = boxHeight(LINES_PER_PAGE)
     const y = SCREEN_HEIGHT - MARGIN - height
-    const hasPortrait = this.shown?.type === 'line' && this.shown.speaker !== null
-    const x = hasPortrait ? MARGIN + PORTRAIT_WIDTH + MARGIN : MARGIN
+    const x = this.speaker ? MARGIN + PORTRAIT_WIDTH + MARGIN : MARGIN
     return { x, y, width: SCREEN_WIDTH - MARGIN - x, height }
-  }
-
-  /**
-   * @param {CanvasRenderingContext2D} ctx
-   * @param {Box} box  The text box the tab sits on.
-   * @param {string} name
-   */
-  #drawNameTab(ctx, box, name) {
-    const width = measureText(name) + PADDING_X * 2 + 2
-    const height = GLYPH_HEIGHT + NAME_PADDING_Y * 2 + 2
-    // Overlap the box by one pixel so the two borders join up.
-    const y = box.y - height + 1
-    drawPanel(ctx, box.x, y, width, height)
-    drawText(ctx, name, box.x + 1 + PADDING_X, y + 1 + NAME_PADDING_Y, UI_COLORS.text)
   }
 
   /**
@@ -217,31 +213,69 @@ export class DialogBox {
    */
   #drawMenu(ctx, choices) {
     const width = SCREEN_WIDTH - MARGIN * 2
-    const wrapped = choices.map((choice) =>
-      wrapText(choice, width - 2 - PADDING_X * 2 - CURSOR_SPACE))
-    const lineCount = wrapped.reduce((sum, lines) => sum + lines.length, 0)
-    const height = boxHeight(lineCount)
-    const x = MARGIN
-    const y = SCREEN_HEIGHT - MARGIN - height
-    drawPanel(ctx, x, y, width, height)
+    const wrapped = choices.map((choice) => wrapText(choice, width - TEXT_INSET_X * 2 - CURSOR_SPACE))
 
-    const textX = x + 1 + PADDING_X + CURSOR_SPACE
-    let textY = y + 1 + PADDING_Y
+    let lineCount = 0
+    for (const lines of wrapped) lineCount += lines.length
+
+    const height = boxHeight(lineCount)
+    const y = SCREEN_HEIGHT - MARGIN - height
+    drawPanel(ctx, MARGIN, y, width, height)
+
+    const cursorX = MARGIN + TEXT_INSET_X
+    let textY = y + TEXT_INSET_Y
     wrapped.forEach((lines, index) => {
       const isSelected = index === this.selected
-      if (isSelected) {
-        // A small right-pointing triangle.
-        ctx.fillStyle = UI_COLORS.text
-        ctx.fillRect(x + 1 + PADDING_X, textY + 1, 1, 5)
-        ctx.fillRect(x + 2 + PADDING_X, textY + 2, 1, 3)
-        ctx.fillRect(x + 3 + PADDING_X, textY + 3, 1, 1)
-      }
+      if (isSelected) drawCursor(ctx, cursorX, textY)
       for (const line of lines) {
-        drawText(ctx, line, textX, textY, isSelected ? UI_COLORS.text : UI_COLORS.textDim)
+        const color = isSelected ? UI_COLORS.text : UI_COLORS.textDim
+        drawText(ctx, line, cursorX + CURSOR_SPACE, textY, color)
         textY += LINE_HEIGHT
       }
     })
   }
+}
+
+/**
+ * The speaker's name, in a small tab on top of the text box.
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {Box} box  The text box.
+ * @param {string} name
+ */
+function drawNameTab(ctx, box, name) {
+  const width = measureText(name) + TEXT_INSET_X * 2
+  const height = GLYPH_HEIGHT + NAME_PADDING_Y * 2 + PANEL_BORDER * 2
+  // Overlap the box so the two borders join up.
+  const y = box.y - height + PANEL_BORDER
+  drawPanel(ctx, box.x, y, width, height)
+  drawText(ctx, name, box.x + TEXT_INSET_X, y + PANEL_BORDER + NAME_PADDING_Y, UI_COLORS.text)
+}
+
+/**
+ * A small down-pointing triangle in the corner of a box, meaning "press A".
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {Box} box
+ */
+function drawArrow(ctx, box) {
+  const x = box.x + box.width - TEXT_INSET_X - ARROW_WIDTH
+  const y = box.y + box.height - TEXT_INSET_Y - ARROW_HEIGHT
+  ctx.fillStyle = UI_COLORS.text
+  ctx.fillRect(x, y, 5, 1)
+  ctx.fillRect(x + 1, y + 1, 3, 1)
+  ctx.fillRect(x + 2, y + 2, 1, 1)
+}
+
+/**
+ * A small right-pointing triangle beside the selected choice.
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {number} x
+ * @param {number} textY  Top of the choice's text.
+ */
+function drawCursor(ctx, x, textY) {
+  ctx.fillStyle = UI_COLORS.text
+  ctx.fillRect(x, textY + 1, 1, 5)
+  ctx.fillRect(x + 1, textY + 2, 1, 3)
+  ctx.fillRect(x + 2, textY + 3, 1, 1)
 }
 
 /**
@@ -250,7 +284,7 @@ export class DialogBox {
  */
 function boxHeight(lineCount) {
   const textHeight = (lineCount - 1) * LINE_HEIGHT + GLYPH_HEIGHT
-  return textHeight + PADDING_Y * 2 + 2
+  return textHeight + TEXT_INSET_Y * 2
 }
 
 /**
@@ -258,5 +292,5 @@ function boxHeight(lineCount) {
  * @param {Box} box
  */
 function textWidth(box) {
-  return box.width - 2 - PADDING_X * 2
+  return box.width - TEXT_INSET_X * 2
 }

@@ -1,11 +1,10 @@
-import { SCREEN_HEIGHT, SCREEN_WIDTH } from '../engine/config.js'
-import { backgroundColor } from '../engine/palette.js'
-
 /**
  * PLACEHOLDER dialog backgrounds, drawn with code: the full-screen scenes that
  * portraits stand in front of. Like all background art they're painted with
  * (ramp, step) colours. Replace with imported pictures of the same size.
  */
+import { SCREEN_HEIGHT, SCREEN_WIDTH } from '../engine/config.js'
+import { backgroundColor } from '../engine/palette.js'
 
 /**
  * @typedef {(rect: (x: number, y: number, w: number, h: number, ramp: string, step: number) => void) => void} BackgroundPainter
@@ -55,17 +54,26 @@ export const BACKGROUND_NAMES = Object.keys(PAINTERS)
  * @returns {Record<string, HTMLCanvasElement>}
  */
 export function createBackgrounds() {
-  return Object.fromEntries(
-    Object.entries(PAINTERS).map(([name, paint]) => {
-      const canvas = document.createElement('canvas')
-      canvas.width = SCREEN_WIDTH
-      canvas.height = SCREEN_HEIGHT
-      const ctx = /** @type {CanvasRenderingContext2D} */ (canvas.getContext('2d'))
-      paint((x, y, w, h, ramp, step) => {
-        ctx.fillStyle = backgroundColor(ramp, step, 0)
-        ctx.fillRect(x, y, w, h)
-      })
-      return [name, canvas]
-    }),
-  )
+  /** @type {Record<string, HTMLCanvasElement>} */
+  const backgrounds = {}
+  for (const [name, paint] of Object.entries(PAINTERS)) {
+    backgrounds[name] = paintBackground(paint)
+  }
+  return backgrounds
+}
+
+/**
+ * @param {BackgroundPainter} paint
+ * @returns {HTMLCanvasElement}
+ */
+function paintBackground(paint) {
+  const canvas = document.createElement('canvas')
+  canvas.width = SCREEN_WIDTH
+  canvas.height = SCREEN_HEIGHT
+  const ctx = /** @type {CanvasRenderingContext2D} */ (canvas.getContext('2d'))
+  paint((x, y, w, h, ramp, step) => {
+    ctx.fillStyle = backgroundColor(ramp, step, 0)
+    ctx.fillRect(x, y, w, h)
+  })
+  return canvas
 }

@@ -1,3 +1,6 @@
+/**
+ * The list of every map in the game.
+ */
 import { cottage } from './cottage.js'
 import { woodEdge } from './wood-edge.js'
 
